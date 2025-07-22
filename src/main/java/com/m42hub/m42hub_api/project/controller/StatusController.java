@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/status")
+@RequestMapping("/api/v1/project/status")
 @RequiredArgsConstructor
 public class StatusController {
 
@@ -27,13 +27,19 @@ public class StatusController {
                 .toList());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<StatusResponse> getById(@PathVariable Long id) {
+        return statusService.findById(id)
+                .map(status -> ResponseEntity.ok(StatusMapper.toStatusResponse(status)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping
-    public ResponseEntity<StatusResponse>  save(@RequestBody StatusRequest request) {
+    public ResponseEntity<StatusResponse> save(@RequestBody StatusRequest request) {
         Status newStatus = StatusMapper.toStatus(request);
         Status savedStatus = statusService.save(newStatus);
         return ResponseEntity.status(HttpStatus.CREATED).body(StatusMapper.toStatusResponse(savedStatus));
     }
-
 
 
 }

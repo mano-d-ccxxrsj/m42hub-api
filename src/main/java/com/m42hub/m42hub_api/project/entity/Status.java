@@ -1,4 +1,5 @@
 package com.m42hub.m42hub_api.project.entity;
+
 import jakarta.persistence.*;
 import lombok.*;
 

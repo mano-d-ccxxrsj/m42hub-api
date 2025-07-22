@@ -1,28 +1,30 @@
 package com.m42hub.m42hub_api.project.service;
 
-import com.m42hub.m42hub_api.project.entity.Status;
-import com.m42hub.m42hub_api.project.repository.StatusRepository;
+import com.m42hub.m42hub_api.project.entity.Complexity;
+import com.m42hub.m42hub_api.project.repository.ComplexityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+
 @Service
 @RequiredArgsConstructor
-public class StatusService {
+public class ComplexityService {
 
-    private final StatusRepository repository;
+    private final ComplexityRepository repository;
 
-    public List<Status> findAll() {
+    public List<Complexity> findAll() {
         return repository.findAll();
     }
 
-    public Optional<Status> findById(Long id) {
+    public Optional<Complexity> findById(Long id) {
         return repository.findById(id);
     }
 
-    public Status save(Status status) {
+    public Complexity save(Complexity status) {
         return repository.save(status);
     }
+
 }

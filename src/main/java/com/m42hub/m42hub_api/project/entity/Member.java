@@ -1,7 +1,7 @@
 package com.m42hub.m42hub_api.project.entity;
+
 import jakarta.persistence.*;
 import lombok.*;
-import org.apache.catalina.User;
 
 @Builder
 @NoArgsConstructor
@@ -17,7 +17,7 @@ public class Member {
     @Column(name = "project_members_id")
     private Long id;
 
-    @Column(name="is_manager", nullable = false)
+    @Column(name = "is_manager", nullable = false)
     private String isManager;
 
     @ManyToOne()
@@ -31,8 +31,6 @@ public class Member {
 //    @ManyToOne()
 //    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
 //    private User user;
-
-
 
 
 }

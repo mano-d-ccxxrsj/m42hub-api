@@ -10,7 +10,7 @@ import lombok.*;
 @Setter
 @Entity
 @Table(name = "project_tools")
-public class Tools {
+public class Tool {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

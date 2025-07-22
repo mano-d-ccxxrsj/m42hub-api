@@ -57,21 +57,21 @@ public class Project {
     private LocalDateTime updatedAt;
 
     @ManyToMany
-    @JoinTable (name = "projects_tools",
+    @JoinTable(name = "projects_tools",
             joinColumns = @JoinColumn(name = "project_id"),
             inverseJoinColumns = @JoinColumn(name = "project_tools_id")
     )
-    private List<Tools> tools;
+    private List<Tool> tools;
 
     @ManyToMany
-    @JoinTable (name = "projects_topics",
+    @JoinTable(name = "projects_topics",
             joinColumns = @JoinColumn(name = "project_id"),
             inverseJoinColumns = @JoinColumn(name = "project_topics_id")
     )
-    private List<Topics> topics;
+    private List<Topic> topics;
 
     @ManyToMany
-    @JoinTable (name = "project_unfilled_roles",
+    @JoinTable(name = "project_unfilled_roles",
             joinColumns = @JoinColumn(name = "project_id"),
             inverseJoinColumns = @JoinColumn(name = "project_role_id")
     )
