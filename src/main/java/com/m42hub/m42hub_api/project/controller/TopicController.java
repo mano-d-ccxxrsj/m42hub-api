@@ -1,15 +1,10 @@
 package com.m42hub.m42hub_api.project.controller;
 
 import com.m42hub.m42hub_api.project.dto.request.ChangeColorRequest;
-import com.m42hub.m42hub_api.project.dto.request.ToolRequest;
 import com.m42hub.m42hub_api.project.dto.request.TopicRequest;
-import com.m42hub.m42hub_api.project.dto.response.ToolResponse;
 import com.m42hub.m42hub_api.project.dto.response.TopicResponse;
-import com.m42hub.m42hub_api.project.entity.Tool;
 import com.m42hub.m42hub_api.project.entity.Topic;
-import com.m42hub.m42hub_api.project.mapper.ToolMapper;
 import com.m42hub.m42hub_api.project.mapper.TopicMapper;
-import com.m42hub.m42hub_api.project.service.ToolService;
 import com.m42hub.m42hub_api.project.service.TopicService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

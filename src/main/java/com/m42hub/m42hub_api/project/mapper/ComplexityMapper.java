@@ -1,11 +1,8 @@
 package com.m42hub.m42hub_api.project.mapper;
 
 import com.m42hub.m42hub_api.project.dto.request.ComplexityRequest;
-import com.m42hub.m42hub_api.project.dto.request.StatusRequest;
 import com.m42hub.m42hub_api.project.dto.response.ComplexityResponse;
-import com.m42hub.m42hub_api.project.dto.response.StatusResponse;
 import com.m42hub.m42hub_api.project.entity.Complexity;
-import com.m42hub.m42hub_api.project.entity.Status;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
