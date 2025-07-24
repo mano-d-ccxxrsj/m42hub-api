@@ -4,6 +4,7 @@ import com.m42hub.m42hub_api.project.entity.Topic;
 import com.m42hub.m42hub_api.project.repository.TopicRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,18 +16,22 @@ public class TopicService {
 
     private final TopicRepository repository;
 
+    @Transactional(readOnly = true)
     public List<Topic> findAll() {
         return repository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Optional<Topic> findById(Long id) {
         return repository.findById(id);
     }
 
+    @Transactional
     public Topic save(Topic topic) {
         return repository.save(topic);
     }
 
+    @Transactional
     public Optional<Topic> changeColor(Long topicId, String hexColor) {
         Optional<Topic> optTopic = repository.findById(topicId);
         if (optTopic.isPresent()) {
