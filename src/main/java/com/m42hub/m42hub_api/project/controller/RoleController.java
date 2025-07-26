@@ -8,6 +8,7 @@ import com.m42hub.m42hub_api.project.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class RoleController {
     private final RoleService roleService;
 
     @GetMapping()
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:get_all')")
     public ResponseEntity<List<RoleResponse>> getAll() {
         return ResponseEntity.ok(roleService.findAll()
                 .stream()
@@ -28,6 +30,7 @@ public class RoleController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:get_by_id')")
     public ResponseEntity<RoleResponse> getById(@PathVariable Long id) {
         return roleService.findById(id)
                 .map(role -> ResponseEntity.ok(RoleMapper.toRoleResponse(role)))
@@ -35,6 +38,7 @@ public class RoleController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:create')")
     public ResponseEntity<RoleResponse> save(@RequestBody RoleRequest request) {
         Role newRole = RoleMapper.toRole(request);
         Role savedRole = roleService.save(newRole);

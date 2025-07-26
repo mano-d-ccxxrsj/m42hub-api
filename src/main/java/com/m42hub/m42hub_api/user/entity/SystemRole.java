@@ -26,7 +26,7 @@ public class SystemRole {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "roles_permissions",
             joinColumns = @JoinColumn(name = "system_role_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id")

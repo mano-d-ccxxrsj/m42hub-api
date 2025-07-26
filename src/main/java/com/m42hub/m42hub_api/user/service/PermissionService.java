@@ -31,4 +31,14 @@ public class PermissionService {
         return repository.save(permission);
     }
 
+    @Transactional
+    public void registerPermission(String name) {
+        if (!repository.existsByName(name)) {
+            Permission permission = Permission
+                    .builder()
+                    .name(name)
+                    .build();
+            repository.save(permission);
+        }
+    }
 }
