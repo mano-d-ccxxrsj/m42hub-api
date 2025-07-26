@@ -9,6 +9,7 @@ import com.m42hub.m42hub_api.project.service.TopicService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class TopicController {
     private final TopicService topicService;
 
     @GetMapping()
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('topic:get_all')")
     public ResponseEntity<List<TopicResponse>> getAll() {
         return ResponseEntity.ok(topicService.findAll()
                 .stream()
@@ -29,6 +31,7 @@ public class TopicController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('topic:get_by_id')")
     public ResponseEntity<TopicResponse> getById(@PathVariable Long id) {
         return topicService.findById(id)
                 .map(topic -> ResponseEntity.ok(TopicMapper.toTopicResponse(topic)))
@@ -36,6 +39,7 @@ public class TopicController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('topic:create')")
     public ResponseEntity<TopicResponse> save(@RequestBody TopicRequest request) {
         Topic newTopic = TopicMapper.toTopic(request);
         Topic savedTopic = topicService.save(newTopic);
@@ -43,6 +47,7 @@ public class TopicController {
     }
 
     @PatchMapping("/color/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('topic:change_color')")
     public ResponseEntity<TopicResponse> changeColor(@PathVariable Long id, @RequestBody ChangeColorRequest request) {
         return topicService.changeColor(id, request.hexColor())
                 .map(topic -> ResponseEntity.ok(TopicMapper.toTopicResponse(topic)))

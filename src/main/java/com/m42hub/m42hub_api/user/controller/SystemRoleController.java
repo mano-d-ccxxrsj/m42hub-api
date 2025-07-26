@@ -13,6 +13,7 @@ import com.m42hub.m42hub_api.user.service.SystemRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class SystemRoleController {
     private final SystemRoleService systemRoleService;
 
     @GetMapping()
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('system_role:get_all')")
     public ResponseEntity<List<SystemRoleResponse>> getAll() {
         return ResponseEntity.ok(systemRoleService.findAll()
                 .stream()
@@ -33,6 +35,7 @@ public class SystemRoleController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('system_role:get_by_id')")
     public ResponseEntity<SystemRoleResponse> getById(@PathVariable Long id) {
         return systemRoleService.findById(id)
                 .map(systemRole -> ResponseEntity.ok(SystemRoleMapper.toSystemRoleResponse(systemRole)))
@@ -40,6 +43,7 @@ public class SystemRoleController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('system_role:create')")
     public ResponseEntity<SystemRoleResponse> save(@RequestBody SystemRoleRequest request) {
         SystemRole newSystemRole = SystemRoleMapper.toSystemRole(request);
         SystemRole savedSystemRole = systemRoleService.save(newSystemRole);

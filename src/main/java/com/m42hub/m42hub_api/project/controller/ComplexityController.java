@@ -8,6 +8,7 @@ import com.m42hub.m42hub_api.project.service.ComplexityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class ComplexityController {
     private final ComplexityService complexityService;
 
     @GetMapping()
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('complexity:get_all')")
     public ResponseEntity<List<ComplexityResponse>> getAll() {
         return ResponseEntity.ok(complexityService.findAll()
                 .stream()
@@ -28,6 +30,7 @@ public class ComplexityController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('complexity:get_by_id')")
     public ResponseEntity<ComplexityResponse> getById(@PathVariable Long id) {
         return complexityService.findById(id)
                 .map(complexity -> ResponseEntity.ok(ComplexityMapper.toComplexityResponse(complexity)))
@@ -35,6 +38,7 @@ public class ComplexityController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('complexity:create')")
     public ResponseEntity<ComplexityResponse>  save(@RequestBody ComplexityRequest request) {
         Complexity newComplexity = ComplexityMapper.toComplexity(request);
         Complexity savedComplexity = complexityService.save(newComplexity);
