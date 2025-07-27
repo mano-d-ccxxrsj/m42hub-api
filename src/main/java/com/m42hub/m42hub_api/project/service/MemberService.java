@@ -1,7 +1,7 @@
 package com.m42hub.m42hub_api.project.service;
 
-import com.m42hub.m42hub_api.project.entity.Project;
-import com.m42hub.m42hub_api.project.repository.ProjectRepository;
+import com.m42hub.m42hub_api.project.entity.Member;
+import com.m42hub.m42hub_api.project.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,23 +11,23 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class ProjectService {
+public class MemberService {
 
-    private final ProjectRepository repository;
+    private final MemberRepository repository;
 
     @Transactional(readOnly = true)
-    public List<Project> findAll() {
+    public List<Member> findAll() {
         return repository.findAll();
     }
 
     @Transactional(readOnly = true)
-    public Optional<Project> findById(Long id) {
+    public Optional<Member> findById(Long id) {
         return repository.findById(id);
     }
 
     @Transactional
-    public Project save(Project project) {
-        return repository.save(project);
+    public Member save(Member member) {
+        return repository.save(member);
     }
 
 }

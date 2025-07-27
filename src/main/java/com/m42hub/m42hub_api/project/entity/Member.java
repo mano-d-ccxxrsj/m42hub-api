@@ -1,5 +1,6 @@
 package com.m42hub.m42hub_api.project.entity;
 
+import com.m42hub.m42hub_api.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,7 +19,7 @@ public class Member {
     private Long id;
 
     @Column(name = "is_manager", nullable = false)
-    private String isManager;
+    private Boolean isManager;
 
     @ManyToOne()
     @JoinColumn(name = "project_id", referencedColumnName = "project_id", nullable = false)
@@ -28,9 +29,9 @@ public class Member {
     @JoinColumn(name = "project_role_id", referencedColumnName = "project_role_id", nullable = false)
     private Role role;
 
-//    @ManyToOne()
-//    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
-//    private User user;
+    @ManyToOne()
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
+    private User user;
 
 
 }
