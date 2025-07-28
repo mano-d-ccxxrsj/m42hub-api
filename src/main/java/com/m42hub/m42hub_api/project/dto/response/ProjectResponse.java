@@ -1,7 +1,5 @@
 package com.m42hub.m42hub_api.project.dto.response;
 
-import com.m42hub.m42hub_api.project.entity.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
 import java.util.Date;
@@ -21,6 +19,6 @@ public record ProjectResponse(
         List<ToolResponse> tools,
         List<TopicResponse> topics,
         List<RoleResponse> unfilledRoles,
-        List<MemberResponse> members
+        List<MemberProjectResponse> members
 ) {
 }

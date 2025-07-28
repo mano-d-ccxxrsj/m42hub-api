@@ -20,9 +20,14 @@ public record ProjectRequest(
         @NotBlank(message = "Data prevista de incio do projeto é obrigatória")
         Date startDate,
         Date endDate,
-        List<Long> tools,
-        List<Long> topics,
-        List<Long> unfilledRoles,
-        List<Long> members
+        @NotBlank(message = "É necessário informar ao menos uma Ferramenta/Tecnologia")
+        List<Long> toolIds,
+        @NotBlank(message = "É necessário informar ao menos um Assunto/Tópico")
+        List<Long> topicIds,
+        @NotBlank(message = "É necessário informar ao cargo a ser preenchido")
+        List<Long> unfilledRoleIds,
+        @NotBlank(message = "É necessário informar o cargo do manager")
+        Long managerRoleId
+
 ) {
 }

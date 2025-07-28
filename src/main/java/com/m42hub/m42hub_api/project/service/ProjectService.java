@@ -1,8 +1,15 @@
 package com.m42hub.m42hub_api.project.service;
 
-import com.m42hub.m42hub_api.project.entity.Project;
+import com.m42hub.m42hub_api.project.entity.*;
 import com.m42hub.m42hub_api.project.repository.ProjectRepository;
+import com.m42hub.m42hub_api.project.specification.ProjectSpecification;
+import com.m42hub.m42hub_api.user.entity.SystemRole;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +21,7 @@ import java.util.Optional;
 public class ProjectService {
 
     private final ProjectRepository repository;
+    private final ComplexityService complexityService;
 
     @Transactional(readOnly = true)
     public List<Project> findAll() {
@@ -25,9 +33,63 @@ public class ProjectService {
         return repository.findById(id);
     }
 
+    @Transactional(readOnly = true)
+    public Page<Project> findByParams(
+            Integer page,
+            Integer limit,
+            String sortBy,
+            String sortDirection,
+            List<Long> status,
+            List<Long> complexity,
+            List<Long> tools,
+            List<Long> topics,
+            List<Long> unfilledRoles
+    ) {
+        if (sortBy == null || sortBy.isEmpty()) {
+            sortBy = "id";
+        }
+
+        Sort sort = Sort.by(Sort.Order.asc(sortBy));
+        if ("DESC".equalsIgnoreCase(sortDirection)) {
+            sort = Sort.by(Sort.Order.desc(sortBy));
+        }
+
+        Pageable pageable = PageRequest.of(page, limit, sort);
+
+        Specification<Project> spec = Specification.allOf();
+
+        if (status != null) {
+            spec = spec.and(ProjectSpecification.status(status));
+        }
+
+        if (complexity != null) {
+            spec = spec.and(ProjectSpecification.complexity(complexity));
+        }
+
+        if (tools != null) {
+            spec = spec.and(ProjectSpecification.tools(tools));
+        }
+
+        if (topics != null) {
+            spec = spec.and(ProjectSpecification.topics(topics));
+        }
+
+        if (unfilledRoles != null) {
+            spec = spec.and(ProjectSpecification.unfilledRoles(unfilledRoles));
+        }
+
+        return repository.findAll(spec, pageable);
+    }
+
     @Transactional
     public Project save(Project project) {
+        project.setComplexity(findComplexity(project.getComplexity()));
         return repository.save(project);
+    }
+
+    @Transactional
+    private Complexity findComplexity(Complexity complexity) {
+        return complexityService.findById(complexity.getId()).orElse(null);
     }
 
 }

@@ -1,15 +1,12 @@
 package com.m42hub.m42hub_api.project.mapper;
 
 import com.m42hub.m42hub_api.project.dto.request.MemberRequest;
-import com.m42hub.m42hub_api.project.dto.request.ProjectRequest;
 import com.m42hub.m42hub_api.project.dto.response.*;
 import com.m42hub.m42hub_api.project.entity.*;
 import com.m42hub.m42hub_api.user.dto.response.UserResponse;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.mapper.UserMapper;
 import lombok.experimental.UtilityClass;
-
-import java.util.List;
 
 @UtilityClass
 public class MemberMapper {
@@ -43,6 +40,18 @@ public class MemberMapper {
                 .project(project)
                 .role(role)
                 .user(user)
+                .build();
+    }
+
+    public static MemberProjectResponse toMemberProjectResponse(Member member) {
+
+        RoleResponse role = member.getRole() != null ? RoleMapper.toRoleResponse(member.getRole()) : null;
+
+        return MemberProjectResponse
+                .builder()
+                .id(member.getId())
+                .isManager(member.getIsManager())
+                .role(role)
                 .build();
     }
 

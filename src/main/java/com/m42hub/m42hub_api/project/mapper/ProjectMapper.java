@@ -3,6 +3,7 @@ package com.m42hub.m42hub_api.project.mapper;
 import com.m42hub.m42hub_api.project.dto.request.ProjectRequest;
 import com.m42hub.m42hub_api.project.dto.response.*;
 import com.m42hub.m42hub_api.project.entity.*;
+import com.m42hub.m42hub_api.user.entity.User;
 import lombok.experimental.UtilityClass;
 
 import java.util.ArrayList;
@@ -11,41 +12,29 @@ import java.util.List;
 @UtilityClass
 public class ProjectMapper {
 
-    public static Project toProject(ProjectRequest request) {
+    public static Project toProject(ProjectRequest request, Long managerId) {
 
         Status status = Status.builder().id(request.statusId()).build();
 
         Complexity complexity = Complexity.builder().id(request.complexityId()).build();
 
-        List<Tool> tools = new ArrayList<>();
-        if (request.tools() != null) {
-            tools = request.tools().stream()
-                    .map(toolId -> Tool.builder().id(toolId).build())
-                    .toList();
-        }
+        Role managerRole = Role.builder().id(request.managerRoleId()).build();
 
-        List<Topic> topics = new ArrayList<>();
-        if (request.topics() != null) {
-            topics = request.topics().stream()
-                    .map(topicId -> Topic.builder().id(topicId).build())
-                    .toList();
-        }
+        User manager = User.builder().id(managerId).build();
 
-        List<Role> unfilledRoles = new ArrayList<>();
-        if (request.unfilledRoles() != null) {
-            unfilledRoles = request.unfilledRoles().stream()
-                    .map(unfilledRoleId -> Role.builder().id(unfilledRoleId).build())
-                    .toList();
-        }
+        List<Tool> tools = request.toolIds().stream()
+                .map(toolId -> Tool.builder().id(toolId).build())
+                .toList();
 
-        List<Member> members = new ArrayList<>();
-        if (request.unfilledRoles() != null) {
-            members = request.members().stream()
-                    .map(memberId -> Member.builder().id(memberId).build())
-                    .toList();
-        }
+        List<Topic> topics = request.topicIds().stream()
+                .map(topicId -> Topic.builder().id(topicId).build())
+                .toList();
 
-        return Project
+        List<Role> unfilledRoles = request.unfilledRoleIds().stream()
+                .map(unfilledRoleId -> Role.builder().id(unfilledRoleId).build())
+                .toList();
+
+        Project project = Project
                 .builder()
                 .name(request.name())
                 .summary(request.summary())
@@ -57,8 +46,18 @@ public class ProjectMapper {
                 .tools(tools)
                 .topics(topics)
                 .unfilledRoles(unfilledRoles)
-                .members(members)
                 .build();
+
+        Member memberManager = Member.builder()
+                .isManager(true)
+                .role(managerRole)
+                .user(manager)
+                .project(project)
+                .build();
+
+        project.setMembers(List.of(memberManager));
+
+        return project;
     }
 
     public static ProjectResponse toProjectResponse(Project project) {
@@ -90,11 +89,11 @@ public class ProjectMapper {
                     .toList();
         }
 
-        List<MemberResponse> members = new ArrayList<>();
+        List<MemberProjectResponse> members = new ArrayList<>();
         if (project.getMembers() != null) {
             members = project.getMembers()
                     .stream()
-                    .map(MemberMapper::toMemberResponse)
+                    .map(MemberMapper::toMemberProjectResponse)
                     .toList();
         }
 

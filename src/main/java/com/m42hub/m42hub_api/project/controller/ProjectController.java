@@ -1,19 +1,21 @@
 package com.m42hub.m42hub_api.project.controller;
 
-import com.m42hub.m42hub_api.project.dto.request.MemberRequest;
+import com.m42hub.m42hub_api.config.JWTUserData;
 import com.m42hub.m42hub_api.project.dto.request.ProjectRequest;
-import com.m42hub.m42hub_api.project.dto.response.MemberResponse;
+import com.m42hub.m42hub_api.project.dto.response.PageResponse;
 import com.m42hub.m42hub_api.project.dto.response.ProjectResponse;
-import com.m42hub.m42hub_api.project.entity.Member;
 import com.m42hub.m42hub_api.project.entity.Project;
-import com.m42hub.m42hub_api.project.mapper.MemberMapper;
+import com.m42hub.m42hub_api.project.mapper.PageMapper;
 import com.m42hub.m42hub_api.project.mapper.ProjectMapper;
-import com.m42hub.m42hub_api.project.service.MemberService;
 import com.m42hub.m42hub_api.project.service.ProjectService;
+import com.m42hub.m42hub_api.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,10 +44,35 @@ public class ProjectController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('project:get_all')")
+    public ResponseEntity<PageResponse<ProjectResponse>> findByParams(
+            @RequestParam(defaultValue = "0", required = false) Integer page,
+            @RequestParam(defaultValue = "10", required = false) Integer limit,
+            @RequestParam(defaultValue = "id", required = false) String sortBy,
+            @RequestParam(defaultValue = "ASC", required = false) String sortDirection,
+            @RequestParam(required = false) List<Long> status,
+            @RequestParam(required = false) List<Long> complexity,
+            @RequestParam(required = false) List<Long> tools,
+            @RequestParam(required = false) List<Long> topics,
+            @RequestParam(required = false) List<Long> unfilledRoles
+    ) {
+        Page<Project> projectPage = projectService.findByParams(page, limit, sortBy, sortDirection, status, complexity, tools, topics, unfilledRoles);
+
+        PageResponse<ProjectResponse> response = PageMapper.toPagedResponse(projectPage, ProjectMapper::toProjectResponse);
+
+        return  ResponseEntity.ok(response);
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('project:create')")
     public ResponseEntity<ProjectResponse> save(@RequestBody ProjectRequest request) {
-        Project newProject = ProjectMapper.toProject(request);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+
+        Project newProject = ProjectMapper.toProject(request, userData.id());
         Project savedProject = projectService.save(newProject);
         return ResponseEntity.status(HttpStatus.CREATED).body(ProjectMapper.toProjectResponse(savedProject));
     }
