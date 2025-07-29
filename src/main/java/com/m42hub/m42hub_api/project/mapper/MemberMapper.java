@@ -3,6 +3,7 @@ package com.m42hub.m42hub_api.project.mapper;
 import com.m42hub.m42hub_api.project.dto.request.MemberRequest;
 import com.m42hub.m42hub_api.project.dto.response.*;
 import com.m42hub.m42hub_api.project.entity.*;
+import com.m42hub.m42hub_api.user.dto.response.AuthenticatedUserResponse;
 import com.m42hub.m42hub_api.user.dto.response.UserResponse;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.mapper.UserMapper;
@@ -28,30 +29,13 @@ public class MemberMapper {
     }
 
     public static MemberResponse toMemberResponse(Member member) {
-
-        ProjectResponse project = member.getProject() != null ? ProjectMapper.toProjectResponse(member.getProject()) : null;
-        RoleResponse role = member.getRole() != null ? RoleMapper.toRoleResponse(member.getRole()) : null;
-        UserResponse user = member.getRole() != null ? UserMapper.toUserResponse(member.getUser()) : null;
-
         return MemberResponse
                 .builder()
                 .id(member.getId())
                 .isManager(member.getIsManager())
-                .project(project)
-                .role(role)
-                .user(user)
-                .build();
-    }
-
-    public static MemberProjectResponse toMemberProjectResponse(Member member) {
-
-        RoleResponse role = member.getRole() != null ? RoleMapper.toRoleResponse(member.getRole()) : null;
-
-        return MemberProjectResponse
-                .builder()
-                .id(member.getId())
-                .isManager(member.getIsManager())
-                .role(role)
+                .project(member.getProject().getId())
+                .role(member.getRole().getId())
+                .user(member.getUser().getId())
                 .build();
     }
 

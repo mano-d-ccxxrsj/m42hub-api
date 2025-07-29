@@ -1,5 +1,6 @@
 package com.m42hub.m42hub_api.project.dto.response;
 
+import com.m42hub.m42hub_api.user.dto.response.AuthenticatedUserResponse;
 import com.m42hub.m42hub_api.user.dto.response.UserResponse;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -8,8 +9,8 @@ import lombok.Builder;
 public record MemberResponse(
         Long id,
         Boolean isManager,
-        ProjectResponse project,
-        RoleResponse role,
-        UserResponse user
+        Long project,
+        Long role,
+        Long user
 ) {
 }

@@ -68,6 +68,7 @@ CREATE TABLE project_members (
     project_role_id INT REFERENCES project_roles(project_role_id) NOT NULL,
     user_id INT REFERENCES users(user_id) NOT NULL,
     UNIQUE (project_id, user_id)
+    UNIQUE (project_id, project_role_id)
 );
 
 CREATE TABLE project_unfilled_roles (

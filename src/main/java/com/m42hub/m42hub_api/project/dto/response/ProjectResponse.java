@@ -1,5 +1,6 @@
 package com.m42hub.m42hub_api.project.dto.response;
 
+import com.m42hub.m42hub_api.project.entity.Member;
 import lombok.Builder;
 
 import java.util.Date;
@@ -19,6 +20,6 @@ public record ProjectResponse(
         List<ToolResponse> tools,
         List<TopicResponse> topics,
         List<RoleResponse> unfilledRoles,
-        List<MemberProjectResponse> members
+        List<MemberResponse> members
 ) {
 }

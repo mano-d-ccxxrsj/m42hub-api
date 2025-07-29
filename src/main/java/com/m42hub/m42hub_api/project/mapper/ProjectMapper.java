@@ -89,11 +89,11 @@ public class ProjectMapper {
                     .toList();
         }
 
-        List<MemberProjectResponse> members = new ArrayList<>();
+        List<MemberResponse> members = new ArrayList<>();
         if (project.getMembers() != null) {
             members = project.getMembers()
                     .stream()
-                    .map(MemberMapper::toMemberProjectResponse)
+                    .map(MemberMapper::toMemberResponse)
                     .toList();
         }
 
