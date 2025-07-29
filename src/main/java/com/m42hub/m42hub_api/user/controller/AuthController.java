@@ -11,7 +11,10 @@ import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.mapper.UserMapper;
 import com.m42hub.m42hub_api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,6 +26,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/auth/")
 @RequiredArgsConstructor
 public class AuthController {
+
+
+    @Value("${m42hub.security.cookie-secure}")
+    private boolean cookieSecure;
 
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
@@ -39,9 +46,11 @@ public class AuthController {
 
             String token = tokenService.generateToken(user);
 
+            ResponseCookie cookie = tokenService.generateCookie(token);
+
             AuthenticatedUserResponse userResponse = UserMapper.toAuthenticatedUserResponse(user);
 
-            return ResponseEntity.ok(new LoginResponse(token, userResponse));
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(new LoginResponse(userResponse));
 
 
         } catch (BadCredentialsException exception) {
@@ -59,6 +68,20 @@ public class AuthController {
     @GetMapping("/validate")
     public ResponseEntity<?> validateToken() {
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        ResponseCookie cookie = ResponseCookie.from("session", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
     }
 
 

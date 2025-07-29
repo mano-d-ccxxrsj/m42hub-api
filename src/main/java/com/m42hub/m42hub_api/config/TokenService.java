@@ -6,6 +6,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.m42hub.m42hub_api.user.entity.User;
 import org.flywaydb.core.internal.license.FlywayJWTValidationException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -14,8 +15,11 @@ import java.util.Optional;
 @Component
 public class TokenService {
 
-    @Value("${m42hub.security.secret")
+    @Value("${m42hub.security.secret}")
     private String secret;
+
+    @Value("${m42hub.security.cookie-secure}")
+    private boolean cookieSecure;
 
     public String generateToken(User user) {
 
@@ -46,6 +50,16 @@ public class TokenService {
         } catch (FlywayJWTValidationException exception) {
             return Optional.empty();
         }
+    }
+
+    public ResponseCookie generateCookie(String jwtToken) {
+        return ResponseCookie.from("session", jwtToken)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .sameSite("Lax") // ou None em ambiente com domínios cruzados
+                .maxAge(8 * 60 * 60) // 8 horas
+                .build();
     }
 
 }

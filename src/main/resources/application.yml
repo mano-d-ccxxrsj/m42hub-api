@@ -14,3 +14,9 @@ spring:
 m42hub:
   security:
     secret: ${SECRET}
+    cookie-secure: false
+
+cors:
+  allowed-origins:
+    http://localhost:4200
+    https://www.m42hub.com

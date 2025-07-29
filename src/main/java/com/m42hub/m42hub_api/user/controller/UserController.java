@@ -1,6 +1,8 @@
 package com.m42hub.m42hub_api.user.controller;
 
+import com.m42hub.m42hub_api.config.JWTUserData;
 import com.m42hub.m42hub_api.user.dto.request.UserRequest;
+import com.m42hub.m42hub_api.user.dto.response.AuthenticatedUserResponse;
 import com.m42hub.m42hub_api.user.dto.response.UserResponse;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.mapper.UserMapper;
@@ -9,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,5 +48,17 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toUserResponse(savedUser));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<AuthenticatedUserResponse> getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+
+        return userService.findById(userData.id())
+                .map(user -> ResponseEntity.ok(UserMapper.toAuthenticatedUserResponse(user)))
+                .orElse(ResponseEntity.notFound().build());
+    }
 
 }

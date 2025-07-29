@@ -28,11 +28,18 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String authorizationHeader = request.getHeader("Authorization");
+        String token = null;
 
-        if (Strings.isNotEmpty(authorizationHeader) && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring("Bearer ".length());
+        if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if ("session".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
 
+        if (token != null) {
             Optional<JWTUserData> optJWTUserData = tokenService.verifyToken(token);
             if (optJWTUserData.isPresent()) {
                 JWTUserData userData = optJWTUserData.get();
@@ -45,10 +52,9 @@ public class SecurityFilter extends OncePerRequestFilter {
 
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userData, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
-                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             }
         }
+
         filterChain.doFilter(request, response);
     }
 
