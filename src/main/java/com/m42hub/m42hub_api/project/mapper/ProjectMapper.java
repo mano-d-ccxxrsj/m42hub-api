@@ -106,6 +106,7 @@ public class ProjectMapper {
                 .status(status)
                 .imageUrl(project.getImageUrl())
                 .complexity(complexity)
+                .creationDate(project.getCreatedAt())
                 .startDate(project.getStartDate())
                 .endDate(project.getEndDate())
                 .tools(tools)

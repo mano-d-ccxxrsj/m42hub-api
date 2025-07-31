@@ -13,6 +13,7 @@ public class ComplexityMapper {
                 .builder()
                 .name(request.name())
                 .description(request.description())
+                .hexColor(request.hexColor())
                 .build();
     }
 
@@ -22,6 +23,7 @@ public class ComplexityMapper {
                 .id(complexity.getId())
                 .name(complexity.getName())
                 .description(complexity.getDescription())
+                .hexColor(complexity.getHexColor())
                 .build();
     }
 
