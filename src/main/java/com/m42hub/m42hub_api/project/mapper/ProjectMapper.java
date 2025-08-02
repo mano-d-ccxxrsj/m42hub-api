@@ -22,6 +22,8 @@ public class ProjectMapper {
 
         User manager = User.builder().id(managerId).build();
 
+        MemberStatus memberStatus = MemberStatus.builder().id(1L).build();
+
         List<Tool> tools = request.toolIds().stream()
                 .map(toolId -> Tool.builder().id(toolId).build())
                 .toList();
@@ -53,6 +55,7 @@ public class ProjectMapper {
                 .role(managerRole)
                 .user(manager)
                 .project(project)
+                .memberStatus(memberStatus)
                 .build();
 
         project.setMembers(List.of(memberManager));
@@ -91,6 +94,7 @@ public class ProjectMapper {
 
         List<MemberResponse> members = new ArrayList<>();
         if (project.getMembers() != null) {
+            project.getMembers().forEach(System.out::println);
             members = project.getMembers()
                     .stream()
                     .map(MemberMapper::toMemberResponse)

@@ -9,6 +9,7 @@ public record AuthenticatedUserResponse(
         String username,
         String firstName,
         String lastName,
-        SystemRoleResponse systemRole
+        Long roleId,
+        String roleName
 ) {
 }

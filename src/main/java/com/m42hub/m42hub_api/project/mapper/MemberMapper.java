@@ -17,7 +17,7 @@ public class MemberMapper {
         Project project = Project.builder().id(request.projectId()).build();
         Role role = Role.builder().id(request.roleId()).build();
         User user = User.builder().id(request.userId()).build();
-
+        MemberStatus memberStatus = MemberStatus.builder().id(1L).build();
 
         return Member
                 .builder()
@@ -25,17 +25,25 @@ public class MemberMapper {
                 .project(project)
                 .role(role)
                 .user(user)
+                .memberStatus(memberStatus)
+                .applicationMessage(request.applicationMessage())
                 .build();
     }
 
     public static MemberResponse toMemberResponse(Member member) {
+
+        AuthenticatedUserResponse user = member.getUser() != null ? UserMapper.toAuthenticatedUserResponse(member.getUser()) : null;
+        MemberStatusResponse memberStatus = member.getUser() != null ? MemberStatusMapper.toMemberStatusResponse(member.getMemberStatus()) : null;
+
         return MemberResponse
                 .builder()
                 .id(member.getId())
                 .isManager(member.getIsManager())
                 .project(member.getProject().getId())
                 .role(member.getRole().getId())
-                .user(member.getUser().getId())
+                .user(user)
+                .memberStatus(memberStatus)
+                .applicationMessage(member.getApplicationMessage())
                 .build();
     }
 

@@ -33,5 +33,14 @@ public class Member {
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne()
+    @JoinColumn(name = "status_id", referencedColumnName = "project_member_status_id", nullable = false)
+    private MemberStatus memberStatus;
+
+    @Column(name="application_message")
+    private String applicationMessage;
+
+    @Column(name="application_feedback")
+    private String applicationFeedback;
 
 }

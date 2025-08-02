@@ -4,6 +4,7 @@ import com.m42hub.m42hub_api.project.entity.*;
 import com.m42hub.m42hub_api.project.repository.ProjectRepository;
 import com.m42hub.m42hub_api.project.specification.ProjectSpecification;
 import com.m42hub.m42hub_api.user.entity.SystemRole;
+import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,7 +29,8 @@ public class ProjectService {
     private final ToolService toolService;
     private final TopicService topicService;
     private final RoleService roleService;
-    private final MemberService memberService;
+    private final MemberStatusService memberStatusService;
+    private final UserService userService;
 
 
     @Transactional(readOnly = true)
@@ -96,6 +98,10 @@ public class ProjectService {
         project.setTools(findTools(project.getTools()));
         project.setTopics(findTopics(project.getTopics()));
         project.setUnfilledRoles(findUnfilledRoles(project.getUnfilledRoles()));
+        project.getMembers().forEach(member -> {
+            member.setMemberStatus(findMemberStatus(member.getMemberStatus()));
+            member.setUser(findUser(member.getUser()));
+        });
 
         return repository.save(project);
     }
@@ -129,6 +135,16 @@ public class ProjectService {
         List<Role> unfilledRolesFound = new ArrayList<>();
         unfilledRoles.forEach(unffiledRole -> roleService.findById(unffiledRole.getId()).ifPresent(unfilledRolesFound::add));
         return unfilledRolesFound;
+    }
+
+    @Transactional
+    private MemberStatus findMemberStatus(MemberStatus memberStatus) {
+        return memberStatusService.findById(memberStatus.getId()).orElse(null);
+    }
+
+    @Transactional
+    private User findUser(User user) {
+        return userService.findById(user.getId()).orElse(null);
     }
 
 }

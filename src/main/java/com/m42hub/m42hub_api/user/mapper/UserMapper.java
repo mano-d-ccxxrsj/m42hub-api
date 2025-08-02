@@ -49,14 +49,20 @@ public class UserMapper {
 
     public static AuthenticatedUserResponse toAuthenticatedUserResponse(User user) {
 
-        SystemRoleResponse systemRole = SystemRoleMapper.toSystemRoleResponse(user.getSystemRole());
+        Long roleId = null;
+        String roleName = null;
+        if (user.getSystemRole() != null) {
+            roleId = user.getSystemRole().getId();
+            roleName = user.getSystemRole().getName();
+        }
 
         return AuthenticatedUserResponse
                 .builder()
                 .username(user.getUsername())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .systemRole(systemRole)
+                .roleId(roleId)
+                .roleName(roleName)
                 .build();
     }
 

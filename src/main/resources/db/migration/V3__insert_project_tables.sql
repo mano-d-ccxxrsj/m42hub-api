@@ -7,6 +7,16 @@ INSERT INTO project_status (
 ('Fase de testes', 'Projeto está na reta final, mas ainda está fazendo lapidações'),
 ('Concluído', 'Já é possivel acessar o projeto');
 
+INSERT INTO project_member_status (
+    name,
+    description
+) VALUES
+('Pendente', 'Usuário solicitou para participar do projeto'),
+('Aprovado', 'Usuário está participando do projeto'),
+('Recusado', 'Usuário não foi aprovado para participar do projeto'),
+('Removido', 'Usuário foi removido do projeto'),
+('Saiu', 'Usuário saiu do projeto por conta prórpia');
+
 INSERT INTO project_complexity (
    name,
    description,

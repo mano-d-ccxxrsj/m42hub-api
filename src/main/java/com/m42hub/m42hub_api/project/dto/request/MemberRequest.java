@@ -10,6 +10,7 @@ public record MemberRequest(
         @NotBlank(message = "Cargo é obrigatório")
         Long roleId,
         @NotBlank(message = "Usuário é obrigatório")
-        Long userId
+        Long userId,
+        String applicationMessage
 ) {
 }

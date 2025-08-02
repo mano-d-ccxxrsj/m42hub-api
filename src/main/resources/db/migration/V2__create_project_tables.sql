@@ -61,12 +61,21 @@ CREATE TABLE project_roles (
     description TEXT
 );
 
+CREATE TABLE project_member_status (
+    project_member_status_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT
+);
+
 CREATE TABLE project_members (
     project_members_id SERIAL PRIMARY KEY,
     is_manager BOOLEAN NOT NULL DEFAULT FALSE,
     project_id INT REFERENCES projects(project_id) NOT NULL,
     project_role_id INT REFERENCES project_roles(project_role_id) NOT NULL,
     user_id INT REFERENCES users(user_id) NOT NULL,
+    status_id INT REFERENCES project_member_status(project_member_status_id) NOT NULL DEFAULT 1,
+    application_message VARCHAR(255),
+    application_feedback VARCHAR(255),
     UNIQUE (project_id, user_id),
     UNIQUE (project_id, project_role_id)
 );
