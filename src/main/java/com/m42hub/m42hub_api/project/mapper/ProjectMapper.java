@@ -1,6 +1,7 @@
 package com.m42hub.m42hub_api.project.mapper;
 
 import com.m42hub.m42hub_api.project.dto.request.ProjectRequest;
+import com.m42hub.m42hub_api.project.dto.request.ProjectUpdateRequest;
 import com.m42hub.m42hub_api.project.dto.response.*;
 import com.m42hub.m42hub_api.project.entity.*;
 import com.m42hub.m42hub_api.user.entity.User;
@@ -63,6 +64,58 @@ public class ProjectMapper {
         return project;
     }
 
+    public static Project toUpdatedProject(ProjectUpdateRequest request) {
+
+        Status status = null;
+        if (request.statusId() != null) {
+            status = Status.builder().id(request.statusId()).build();
+        }
+
+        Complexity complexity = null;
+        if (request.complexityId() != null) {
+            complexity = Complexity.builder().id(request.complexityId()).build();
+        }
+
+        List<Tool> tools = null;
+        if (request.toolIds() != null) {
+            tools = new ArrayList<>();
+            for (Long toolId : request.toolIds()) {
+                tools.add(Tool.builder().id(toolId).build());
+            }
+        }
+
+        List<Topic> topics = null;
+        if (request.topicIds() != null) {
+            topics = new ArrayList<>();
+            for (Long topicId : request.topicIds()) {
+                topics.add(Topic.builder().id(topicId).build());
+            }
+        }
+
+        List<Role> unfilledRoles = null;
+        if (request.unfilledRoleIds() != null) {
+            unfilledRoles = new ArrayList<>();
+            for (Long roleId : request.unfilledRoleIds()) {
+                unfilledRoles.add(Role.builder().id(roleId).build());
+            }
+        }
+
+        return Project
+                .builder()
+                .name(request.name())
+                .summary(request.summary())
+                .description(request.description())
+                .status(status)
+                .complexity(complexity)
+                .startDate(request.startDate())
+                .endDate(request.endDate())
+                .tools(tools)
+                .topics(topics)
+                .unfilledRoles(unfilledRoles)
+                .build();
+
+    }
+
     public static ProjectResponse toProjectResponse(Project project) {
 
         StatusResponse status = project.getStatus() != null ? StatusMapper.toStatusResponse(project.getStatus()) : null;
@@ -94,7 +147,6 @@ public class ProjectMapper {
 
         List<MemberResponse> members = new ArrayList<>();
         if (project.getMembers() != null) {
-            project.getMembers().forEach(System.out::println);
             members = project.getMembers()
                     .stream()
                     .map(MemberMapper::toMemberResponse)

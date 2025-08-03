@@ -14,9 +14,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PatchMapping;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -93,18 +96,88 @@ public class ProjectService {
 
     @Transactional
     public Project save(Project project) {
-        project.setStatus(findStatus(project.getStatus()));
-        project.setComplexity(findComplexity(project.getComplexity()));
-        project.setTools(findTools(project.getTools()));
-        project.setTopics(findTopics(project.getTopics()));
-        project.setUnfilledRoles(findUnfilledRoles(project.getUnfilledRoles()));
+        project.setStatus(this.findStatus(project.getStatus()));
+        project.setComplexity(this.findComplexity(project.getComplexity()));
+        project.setTools(this.findTools(project.getTools()));
+        project.setTopics(this.findTopics(project.getTopics()));
+        project.setUnfilledRoles(this.findUnfilledRoles(project.getUnfilledRoles()));
         project.getMembers().forEach(member -> {
-            member.setMemberStatus(findMemberStatus(member.getMemberStatus()));
-            member.setUser(findUser(member.getUser()));
+            member.setMemberStatus(this.findMemberStatus(member.getMemberStatus()));
+            member.setUser(this.findUser(member.getUser()));
         });
 
         return repository.save(project);
     }
+
+    public Optional<Project> update(Long projectId, Project updatedProject, Long userId) {
+        Optional<Project> optProject = repository.findById(projectId);
+
+        if(optProject.isPresent()) {
+            Project project = optProject.get();
+
+            Long managerId = project.getMembers().stream()
+                    .filter(Member::getIsManager)
+                    .map(member -> member.getUser().getId())
+                    .findFirst()
+                    .orElse(null);
+            if (!Objects.equals(managerId, userId)) {
+                return Optional.empty();
+            }
+
+            if (updatedProject.getName() != null) project.setName(updatedProject.getName());
+            if (updatedProject.getSummary() != null) project.setSummary(updatedProject.getSummary());
+            if (updatedProject.getDescription() != null) project.setDescription(updatedProject.getDescription());
+            if (updatedProject.getImageUrl() != null) project.setImageUrl(updatedProject.getImageUrl());
+            if (updatedProject.getStartDate() != null) project.setStartDate(updatedProject.getStartDate());
+            if (updatedProject.getEndDate() != null) project.setEndDate(updatedProject.getEndDate());
+
+            if (updatedProject.getStatus() != null) {
+                project.setStatus(findStatus(updatedProject.getStatus()));
+            }
+
+            if (updatedProject.getComplexity() != null) {
+                project.setComplexity(findComplexity(updatedProject.getComplexity()));
+            }
+
+            if (updatedProject.getTools() != null) {
+                project.setTools(findTools(updatedProject.getTools()));
+            }
+
+            if (updatedProject.getTopics() != null) {
+                project.setTopics(findTopics(updatedProject.getTopics()));
+            }
+
+            if (updatedProject.getUnfilledRoles() != null) {
+                project.setUnfilledRoles(findUnfilledRoles(updatedProject.getUnfilledRoles()));
+            }
+
+            repository.save(project);
+            return Optional.of(project);
+
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Project> changeUnfilledRoles(Long projectId, List<Long> unfilledRoleIds) {
+        Optional<Project> optProject = repository.findById(projectId);
+
+        if(optProject.isPresent()) {
+            List<Role> unfilledRoles = unfilledRoleIds.stream()
+                    .map(unfilledRoleId -> Role.builder().id(unfilledRoleId).build())
+                    .toList();
+
+            List<Role> unfilledRolesFound = findUnfilledRoles(unfilledRoles);
+
+            Project project = optProject.get();
+            project.setUnfilledRoles(unfilledRolesFound);
+
+            repository.save(project);
+            return Optional.of(project);
+        }
+
+        return Optional.empty();
+    }
+
 
     @Transactional
     private Status findStatus(Status status) {
