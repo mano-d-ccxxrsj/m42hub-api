@@ -96,7 +96,11 @@ public class ProjectController {
     @PatchMapping("/unfilled-roles/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('project:change_unfilled_roles')")
     public ResponseEntity<ProjectResponse> changeUnfilledRoles(@PathVariable Long id, @RequestBody ChangeUnfilledRolesRequest request) {
-        return projectService.changeUnfilledRoles(id,request.unfilledRoles())
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+
+        return projectService.changeUnfilledRoles(id,request.unfilledRoles(), userData.id())
                 .map(project -> ResponseEntity.ok(ProjectMapper.toProjectResponse(project)))
                 .orElse(ResponseEntity.notFound().build());
     }

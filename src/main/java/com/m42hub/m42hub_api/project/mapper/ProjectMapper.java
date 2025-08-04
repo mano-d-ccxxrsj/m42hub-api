@@ -23,7 +23,7 @@ public class ProjectMapper {
 
         User manager = User.builder().id(managerId).build();
 
-        MemberStatus memberStatus = MemberStatus.builder().id(1L).build();
+        MemberStatus memberStatus = MemberStatus.builder().id(2L).build();
 
         List<Tool> tools = request.toolIds().stream()
                 .map(toolId -> Tool.builder().id(toolId).build())

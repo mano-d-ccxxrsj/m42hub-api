@@ -76,8 +76,7 @@ CREATE TABLE project_members (
     status_id INT REFERENCES project_member_status(project_member_status_id) NOT NULL DEFAULT 1,
     application_message VARCHAR(255),
     application_feedback VARCHAR(255),
-    UNIQUE (project_id, user_id),
-    UNIQUE (project_id, project_role_id)
+    UNIQUE (project_id, user_id)
 );
 
 CREATE TABLE project_unfilled_roles (

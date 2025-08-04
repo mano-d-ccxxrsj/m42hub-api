@@ -3,7 +3,6 @@ package com.m42hub.m42hub_api.project.service;
 import com.m42hub.m42hub_api.project.entity.*;
 import com.m42hub.m42hub_api.project.repository.ProjectRepository;
 import com.m42hub.m42hub_api.project.specification.ProjectSpecification;
-import com.m42hub.m42hub_api.user.entity.SystemRole;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PatchMapping;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -115,14 +112,7 @@ public class ProjectService {
         if(optProject.isPresent()) {
             Project project = optProject.get();
 
-            Long managerId = project.getMembers().stream()
-                    .filter(Member::getIsManager)
-                    .map(member -> member.getUser().getId())
-                    .findFirst()
-                    .orElse(null);
-            if (!Objects.equals(managerId, userId)) {
-                return Optional.empty();
-            }
+            if (this.isNotManager(project, userId)) return Optional.empty();
 
             if (updatedProject.getName() != null) project.setName(updatedProject.getName());
             if (updatedProject.getSummary() != null) project.setSummary(updatedProject.getSummary());
@@ -158,7 +148,7 @@ public class ProjectService {
         return Optional.empty();
     }
 
-    public Optional<Project> changeUnfilledRoles(Long projectId, List<Long> unfilledRoleIds) {
+    public Optional<Project> changeUnfilledRoles(Long projectId, List<Long> unfilledRoleIds, Long userId) {
         Optional<Project> optProject = repository.findById(projectId);
 
         if(optProject.isPresent()) {
@@ -167,8 +157,13 @@ public class ProjectService {
                     .toList();
 
             List<Role> unfilledRolesFound = findUnfilledRoles(unfilledRoles);
-
             Project project = optProject.get();
+
+            boolean hasFilledRole = unfilledRolesFound.stream()
+                    .anyMatch(role -> isRoleFilled(project, role));
+
+            if (hasFilledRole) return Optional.empty();
+
             project.setUnfilledRoles(unfilledRolesFound);
 
             repository.save(project);
@@ -178,6 +173,20 @@ public class ProjectService {
         return Optional.empty();
     }
 
+
+    public boolean isNotManager(Project project, Long userId) {
+        return project.getMembers().stream()
+                .filter(Member::getIsManager)
+                .map(member -> member.getUser().getId())
+                .noneMatch(managerId -> Objects.equals(managerId, userId));
+    }
+
+    public boolean isRoleFilled(Project project, Role role) {
+        return project.getMembers().stream()
+                .filter(member -> member.getMemberStatus() != null
+                        && member.getMemberStatus().getId() == 2L)
+                .anyMatch(member -> member.getRole().equals(role));
+    }
 
     @Transactional
     private Status findStatus(Status status) {
