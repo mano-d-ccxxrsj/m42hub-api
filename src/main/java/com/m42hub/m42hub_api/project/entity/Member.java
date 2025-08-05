@@ -3,6 +3,10 @@ package com.m42hub.m42hub_api.project.entity;
 import com.m42hub.m42hub_api.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Builder
 @NoArgsConstructor
@@ -42,5 +46,11 @@ public class Member {
 
     @Column(name="application_feedback")
     private String applicationFeedback;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
 }

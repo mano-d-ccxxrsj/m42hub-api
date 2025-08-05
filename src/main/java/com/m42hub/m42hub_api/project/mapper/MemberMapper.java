@@ -21,7 +21,7 @@ public class MemberMapper {
 
         return Member
                 .builder()
-                .isManager(request.isManager())
+                .isManager(false)
                 .project(project)
                 .role(role)
                 .user(user)
@@ -44,6 +44,7 @@ public class MemberMapper {
                 .user(user)
                 .memberStatus(memberStatus)
                 .applicationMessage(member.getApplicationMessage())
+                .createdAt(member.getCreatedAt())
                 .build();
     }
 

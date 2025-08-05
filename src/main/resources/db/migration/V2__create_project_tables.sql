@@ -76,6 +76,8 @@ CREATE TABLE project_members (
     status_id INT REFERENCES project_member_status(project_member_status_id) NOT NULL DEFAULT 1,
     application_message VARCHAR(255),
     application_feedback VARCHAR(255),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
     UNIQUE (project_id, user_id)
 );
 

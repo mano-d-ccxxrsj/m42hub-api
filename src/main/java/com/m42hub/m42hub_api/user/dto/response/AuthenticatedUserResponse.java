@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 @Builder
 public record AuthenticatedUserResponse(
+        Long id,
         String username,
         String firstName,
         String lastName,

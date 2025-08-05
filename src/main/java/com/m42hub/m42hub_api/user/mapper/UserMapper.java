@@ -58,6 +58,7 @@ public class UserMapper {
 
         return AuthenticatedUserResponse
                 .builder()
+                .id(user.getId())
                 .username(user.getUsername())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
