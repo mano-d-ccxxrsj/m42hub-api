@@ -4,6 +4,7 @@ import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -42,8 +43,16 @@ public class SecurityConfig {
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/register").permitAll()
-                        .requestMatchers("/api/v1/project").permitAll()
-                        .requestMatchers("/api/v1/project/*").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/v1/project",
+                                "/api/v1/project/**",
+                                "/api/v1/project/complexity/**",
+                                "/api/v1/project/role/**",
+                                "/api/v1/project/status/**",
+                                "/api/v1/project/tool/**",
+                                "/api/v1/project/topic/**"
+                        ).permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))

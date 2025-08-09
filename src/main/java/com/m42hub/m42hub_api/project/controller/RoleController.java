@@ -21,7 +21,6 @@ public class RoleController {
     private final RoleService roleService;
 
     @GetMapping()
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('role:get_all')")
     public ResponseEntity<List<RoleResponse>> getAll() {
         return ResponseEntity.ok(roleService.findAll()
                 .stream()
@@ -30,7 +29,6 @@ public class RoleController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('role:get_by_id')")
     public ResponseEntity<RoleResponse> getById(@PathVariable Long id) {
         return roleService.findById(id)
                 .map(role -> ResponseEntity.ok(RoleMapper.toRoleResponse(role)))

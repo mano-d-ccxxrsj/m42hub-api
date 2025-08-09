@@ -21,7 +21,6 @@ public class StatusController {
     private final StatusService statusService;
 
     @GetMapping()
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('status:get_all')")
     public ResponseEntity<List<StatusResponse>> getAll() {
         return ResponseEntity.ok(statusService.findAll()
                 .stream()
@@ -30,7 +29,6 @@ public class StatusController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('status:get_by_id')")
     public ResponseEntity<StatusResponse> getById(@PathVariable Long id) {
         return statusService.findById(id)
                 .map(status -> ResponseEntity.ok(StatusMapper.toStatusResponse(status)))

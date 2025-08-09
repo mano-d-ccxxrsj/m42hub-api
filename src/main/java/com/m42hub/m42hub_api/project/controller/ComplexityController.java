@@ -21,7 +21,6 @@ public class ComplexityController {
     private final ComplexityService complexityService;
 
     @GetMapping()
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('complexity:get_all')")
     public ResponseEntity<List<ComplexityResponse>> getAll() {
         return ResponseEntity.ok(complexityService.findAll()
                 .stream()
@@ -30,7 +29,6 @@ public class ComplexityController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('complexity:get_by_id')")
     public ResponseEntity<ComplexityResponse> getById(@PathVariable Long id) {
         return complexityService.findById(id)
                 .map(complexity -> ResponseEntity.ok(ComplexityMapper.toComplexityResponse(complexity)))

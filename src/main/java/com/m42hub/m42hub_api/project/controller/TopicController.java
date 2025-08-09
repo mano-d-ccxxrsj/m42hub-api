@@ -22,7 +22,6 @@ public class TopicController {
     private final TopicService topicService;
 
     @GetMapping()
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('topic:get_all')")
     public ResponseEntity<List<TopicResponse>> getAll() {
         return ResponseEntity.ok(topicService.findAll()
                 .stream()
@@ -31,7 +30,6 @@ public class TopicController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('topic:get_by_id')")
     public ResponseEntity<TopicResponse> getById(@PathVariable Long id) {
         return topicService.findById(id)
                 .map(topic -> ResponseEntity.ok(TopicMapper.toTopicResponse(topic)))

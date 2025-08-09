@@ -22,7 +22,6 @@ public class ToolController {
     private final ToolService toolService;
 
     @GetMapping()
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('tool:get_all')")
     public ResponseEntity<List<ToolResponse>> getAll() {
         return ResponseEntity.ok(toolService.findAll()
                 .stream()
@@ -31,7 +30,6 @@ public class ToolController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('tool:get_by_id')")
     public ResponseEntity<ToolResponse> getById(@PathVariable Long id) {
         return toolService.findById(id)
                 .map(tool -> ResponseEntity.ok(ToolMapper.toToolResponse(tool)))

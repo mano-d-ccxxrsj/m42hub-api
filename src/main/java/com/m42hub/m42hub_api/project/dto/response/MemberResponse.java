@@ -15,6 +15,7 @@ public record MemberResponse(
         AuthenticatedUserResponse user,
         MemberStatusResponse memberStatus,
         String applicationMessage,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
         LocalDateTime createdAt
 ) {
 }

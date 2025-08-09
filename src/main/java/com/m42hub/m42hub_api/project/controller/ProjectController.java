@@ -31,7 +31,6 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @GetMapping()
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('project:get_all')")
     public ResponseEntity<List<ProjectResponse>> getAll() {
         return ResponseEntity.ok(projectService.findAll()
                 .stream()
@@ -40,7 +39,6 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('project:get_by_id')")
     public ResponseEntity<ProjectResponse> getById(@PathVariable Long id) {
         return projectService.findById(id)
                 .map(project -> ResponseEntity.ok(ProjectMapper.toProjectResponse(project)))
@@ -48,7 +46,6 @@ public class ProjectController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('project:get_all')")
     public ResponseEntity<PageResponse<ProjectResponse>> findByParams(
             @RequestParam(defaultValue = "0", required = false) Integer page,
             @RequestParam(defaultValue = "10", required = false) Integer limit,
