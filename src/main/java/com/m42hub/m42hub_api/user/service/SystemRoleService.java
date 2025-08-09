@@ -1,5 +1,7 @@
 package com.m42hub.m42hub_api.user.service;
 
+import com.m42hub.m42hub_api.project.entity.Project;
+import com.m42hub.m42hub_api.project.entity.Role;
 import com.m42hub.m42hub_api.user.entity.Permission;
 import com.m42hub.m42hub_api.user.entity.SystemRole;
 import com.m42hub.m42hub_api.user.repository.SystemRoleRepository;
@@ -33,6 +35,27 @@ public class SystemRoleService {
     public SystemRole save(SystemRole systemRole) {
         systemRole.setPermissions(this.findPermissions(systemRole.getPermissions()));
         return repository.save(systemRole);
+    }
+
+    @Transactional
+    public Optional<SystemRole> changePermissions(Long systemRoleId, List<Long> permissionIds) {
+        Optional<SystemRole> optSystemRole= repository.findById(systemRoleId);
+
+        if(optSystemRole.isPresent()) {
+            List<Permission> permissions = permissionIds.stream()
+                    .map(unfilledRoleId -> Permission.builder().id(unfilledRoleId).build())
+                    .toList();
+
+            List<Permission> permissionsFound = findPermissions(permissions);
+            SystemRole systemRole = optSystemRole.get();
+
+            systemRole.setPermissions(permissionsFound);
+
+            repository.save(systemRole);
+            return Optional.of(systemRole);
+        }
+
+        return Optional.empty();
     }
 
     @Transactional
