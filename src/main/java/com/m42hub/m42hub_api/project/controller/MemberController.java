@@ -21,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/project/member")
@@ -50,6 +51,19 @@ public class MemberController {
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('member:create')")
     public ResponseEntity<MemberResponse> save(@RequestBody MemberRequest request) {
         Member newMember = MemberMapper.toMember(request);
+        Member savedMember = memberService.save(newMember);
+        return ResponseEntity.status(HttpStatus.CREATED).body(MemberMapper.toMemberResponse(savedMember));
+    }
+
+    @PostMapping("/apply")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('member:create')")
+    public ResponseEntity<MemberResponse> apply(@RequestBody MemberRequest request) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+
+        Member newMember = MemberMapper.toMemberApply(request, userData.id());
         Member savedMember = memberService.save(newMember);
         return ResponseEntity.status(HttpStatus.CREATED).body(MemberMapper.toMemberResponse(savedMember));
     }

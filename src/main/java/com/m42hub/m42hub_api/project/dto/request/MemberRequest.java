@@ -8,7 +8,6 @@ public record MemberRequest(
         Long projectId,
         @NotBlank(message = "Cargo é obrigatório")
         Long roleId,
-        @NotBlank(message = "Usuário é obrigatório")
         Long userId,
         String applicationMessage
 ) {

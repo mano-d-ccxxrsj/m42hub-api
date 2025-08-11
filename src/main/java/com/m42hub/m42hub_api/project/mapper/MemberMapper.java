@@ -30,6 +30,24 @@ public class MemberMapper {
                 .build();
     }
 
+    public static Member toMemberApply(MemberRequest request, Long userId) {
+
+        Project project = Project.builder().id(request.projectId()).build();
+        Role role = Role.builder().id(request.roleId()).build();
+        User user = User.builder().id(userId).build();
+        MemberStatus memberStatus = MemberStatus.builder().id(1L).build();
+
+        return Member
+                .builder()
+                .isManager(false)
+                .project(project)
+                .role(role)
+                .user(user)
+                .memberStatus(memberStatus)
+                .applicationMessage(request.applicationMessage())
+                .build();
+    }
+
     public static MemberResponse toMemberResponse(Member member) {
 
         AuthenticatedUserResponse user = member.getUser() != null ? UserMapper.toAuthenticatedUserResponse(member.getUser()) : null;
