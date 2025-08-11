@@ -1,12 +1,32 @@
 version: '3.8'
+
 services:
   postgres:
     image: postgres:latest
-    container_name: m42hub-container
+    container_name: m42hub-db
     environment:
       POSTGRES_DB: ${DATABASE_NAME}
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
       - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     restart: always
+
+  m42hub:
+    build: .
+    container_name: m42hub-api
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    ports:
+      - "8084:8080"
+    volumes:
+      - app_data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  app_data:
