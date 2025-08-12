@@ -90,8 +90,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of("http://localhost:4200"));
-        config.setAllowedOriginPatterns(List.of("http://*.m42hub.com"));
-        config.setAllowedOriginPatterns(List.of("https://*.m42hub.com"));
+        config.setAllowedOriginPatterns(List.of("http://dev.m42hub.com/"));
+        config.setAllowedOriginPatterns(List.of("https://www.m42hub.com"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
