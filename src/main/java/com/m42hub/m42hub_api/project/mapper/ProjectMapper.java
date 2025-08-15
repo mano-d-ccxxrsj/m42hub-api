@@ -9,6 +9,7 @@ import lombok.experimental.UtilityClass;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @UtilityClass
 public class ProjectMapper {
@@ -33,9 +34,10 @@ public class ProjectMapper {
                 .map(topicId -> Topic.builder().id(topicId).build())
                 .toList();
 
-        List<Role> unfilledRoles = request.unfilledRoleIds().stream()
+        List<Role> unfilledRoles = new ArrayList<>(request.unfilledRoleIds().stream()
                 .map(unfilledRoleId -> Role.builder().id(unfilledRoleId).build())
-                .toList();
+                .filter(role -> !Objects.equals(role.getId(), managerRole.getId()))
+                .toList());
 
         Project project = Project
                 .builder()
