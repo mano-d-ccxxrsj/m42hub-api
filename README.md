@@ -178,33 +178,61 @@ src/
 
 ## 🔌 Principais Endpoints
 
-### Autenticação
-- `POST /api/v1/auth/register` - Registro de usuário
-- `POST /api/v1/auth/login` - Login
-- `GET /api/v1/auth/validate` - Validação de token
-- `POST /api/v1/auth/logout` - Logout
+### Autenticação (`/api/v1/auth/`)
+- `POST /login` - Login de usuário
+- `POST /register` - Registro de usuário
+- `GET /validate` - Validação de token
+- `POST /logout` - Logout
 
-### Projetos
-- `GET /api/v1/project` - Listar projetos (com filtros e paginação)
-- `POST /api/v1/project` - Criar projeto
-- `GET /api/v1/project/{id}` - Detalhes do projeto
-- `PATCH /api/v1/project/{id}` - Atualizar projeto
+### Usuários (`/api/v1/user`)
+- `GET /` - Listar usuários (admin)
+- `GET /{id}` - Buscar usuário por ID (admin)
+- `POST /` - Criar usuário (admin)
+- `GET /me` - Dados do usuário logado
 
-### Usuários
-- `GET /api/v1/user/me` - Dados do usuário logado
-- `GET /api/v1/user` - Listar usuários (admin)
-- `POST /api/v1/user` - Criar usuário (admin)
+### Roles e Permissões
+- `GET /api/v1/user/permission` - Listar permissões (admin)
+- `GET /api/v1/user/permission/{id}` - Buscar permissão por ID (admin)
+- `POST /api/v1/user/permission` - Criar permissão (admin)
+- `GET /api/v1/user/system-role` - Listar roles do sistema (admin)
+- `GET /api/v1/user/system-role/{id}` - Buscar role por ID (admin)
+- `POST /api/v1/user/system-role` - Criar role (admin)
+- `PATCH /api/v1/user/system-role/permissions/{id}` - Alterar permissões de role (admin)
 
-### Membros de Projeto
-- `POST /api/v1/project/member/apply` - Aplicar para projeto
-- `PATCH /api/v1/project/member/approve/{id}` - Aprovar aplicação
-- `PATCH /api/v1/project/member/reject/{id}` - Rejeitar aplicação
+### Projetos (`/api/v1/project`)
+- `GET /` - Listar projetos (com filtros e paginação)
+- `POST /` - Criar projeto
+- `GET /{id}` - Detalhes do projeto
+- `PATCH /{id}` - Atualizar projeto
+- `PATCH /unfilled-roles/{id}` - Alterar vagas não preenchidas
 
-### Recursos Auxiliares
-- `GET /api/v1/project/topic` - Tópicos disponíveis
-- `GET /api/v1/project/tool` - Ferramentas disponíveis
-- `GET /api/v1/project/complexity` - Níveis de complexidade
+### Membros (`/api/v1/project/member`)
+- `GET /` - Listar membros (admin)
+- `GET /{id}` - Buscar membro por ID (admin)
+- `POST /` - Criar membro (admin)
+- `POST /apply` - Aplicar para projeto
+- `PATCH /approve/{id}` - Aprovar aplicação
+- `PATCH /reject/{id}` - Rejeitar aplicação
+
+### Status e Categorização
 - `GET /api/v1/project/status` - Status de projetos
+- `POST /api/v1/project/status` - Criar status (admin)
+- `GET /api/v1/project/complexity` - Níveis de complexidade
+- `POST /api/v1/project/complexity` - Criar complexidade (admin)
+
+### Recursos de Projeto
+- `GET /api/v1/project/topic` - Tópicos disponíveis
+- `POST /api/v1/project/topic` - Criar tópico (admin)
+- `PATCH /api/v1/project/topic/color/{id}` - Alterar cor do tópico (admin)
+- `GET /api/v1/project/tool` - Ferramentas disponíveis
+- `POST /api/v1/project/tool` - Criar ferramenta (admin)
+- `PATCH /api/v1/project/tool/color/{id}` - Alterar cor da ferramenta (admin)
+- `GET /api/v1/project/role` - Roles de projeto
+- `POST /api/v1/project/role` - Criar role de projeto (admin)
+
+### Status de Membros
+- `GET /api/v1/project/member/status` - Status de membros
+- `POST /api/v1/project/member/status` - Criar status de membro (admin)
 
 ## 🔐 Sistema de Autenticação
 
@@ -229,69 +257,322 @@ curl -X GET http://localhost:8080/api/v1/user/me \
 
 ## 🤝 Como Contribuir
 
-Adoramos contribuições da comunidade! Veja como você pode ajudar:
+Adoramos contribuições da comunidade! O processo é simples e direto:
 
-### 1. 🐛 Reportar Bugs
-- Use o [sistema de issues](https://github.com/m42hub/m42hub-api/issues)
-- Descreva o problema detalhadamente
-- Inclua logs e steps para reproduzir o bug
+### 📋 Processo de Contribuição
 
-### 2. 💡 Sugerir Features
-- Abra uma issue com a tag `feature request`
-- Explique o valor da funcionalidade para a API
-- Forneça exemplos de uso se possível
+1. **Fork o repositório**
+   - Acesse [github.com/m42hub/m42hub-api](https://github.com/m42hub/m42hub-api)
+   - Clique em "Fork" para criar sua cópia do projeto
 
-### 3. 🔧 Contribuir com Código
-
-1. **Fork o projeto**
-2. **Crie uma branch para sua feature**
+2. **Clone seu fork**
    ```bash
-   git checkout -b feature/amazing-feature
+   git clone https://github.com/SEU_USUARIO/m42hub-api.git
+   cd m42hub-api
    ```
-3. **Faça suas alterações**
-4. **Execute os testes**
+
+3. **Configure o upstream**
+   ```bash
+   git remote add upstream https://github.com/m42hub/m42hub-api.git
+   ```
+
+4. **Crie uma branch para sua feature**
+   ```bash
+   git checkout -b feature/minha-feature
+   ```
+
+5. **Faça suas alterações**
+   - Implemente sua feature ou correção
+   - Siga os padrões de código estabelecidos
+   - Adicione testes se necessário
+
+6. **Execute os testes**
    ```bash
    mvn test
    ```
-5. **Commit suas mudanças**
+
+7. **Commit suas mudanças**
    ```bash
-   git commit -m 'Add: amazing feature'
+   git add .
+   git commit -m "feat: adiciona nova funcionalidade"
    ```
-6. **Push para a branch**
+
+
+8. **Push para seu fork**
    ```bash
-   git push origin feature/amazing-feature
+   git push origin feature/minha-feature
    ```
-7. **Abra um Pull Request**
+   
+9. **Mantenha seu fork atualizado**
+   ```bash
+   git fetch upstream
+   git pull upstream main
+   ```
+
+10. **Abra um Pull Request**
+    - Vá para seu fork no GitHub
+    - Clique em "New Pull Request"
+    - **Aponte diretamente para a branch `main`** do repositório original
+    - Descreva suas mudanças detalhadamente
+
+### 🎯 Tipos de Contribuição
+
+#### � Reportar Bugs
+- Use o [sistema de issues](https://github.com/m42hub/m42hub-api/issues)
+- Use o template de bug report
+- Inclua logs, stack traces e steps para reproduzir
+- Adicione labels apropriadas
+
+#### 💡 Sugerir Features
+- Abra uma issue com a tag `enhancement`
+- Use o template de feature request
+- Explique o problema que a feature resolve
+- Forneça exemplos de uso e mockups se aplicável
+
+#### 🔧 Contribuir com Código
+- **Correções de bug**: Sempre bem-vindas
+- **Novas features**: Discuta primeiro em uma issue
+- **Melhorias de performance**: Inclua benchmarks
+- **Documentação**: Ajude a manter tudo atualizado
+- **Testes**: Aumente a cobertura e qualidade
 
 ### 📋 Padrões de Código
 
-- Use **Java 21** com as features mais recentes
-- Siga as convenções do **Spring Boot**
-- Mantenha **services focados** em responsabilidade única
-- Escreva **testes** para novas funcionalidades
-- Use **commits semânticos** (feat:, fix:, docs:, etc.)
-- **Documente** endpoints complexos
+#### **Convenções Java**
+```java
+// ✅ Bom
+@Service
+@RequiredArgsConstructor
+public class UserService {
+    
+    private final UserRepository userRepository;
+    
+    @Transactional(readOnly = true)
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
+}
+
+// ❌ Evitar
+public class userservice {
+    public user getUser(long id) { ... }
+}
+```
+
+#### **Commits Semânticos**
+```bash
+# Tipos aceitos
+feat: nova funcionalidade
+fix: correção de bug
+docs: mudanças na documentação
+style: formatação, ponto e vírgula, etc
+refactor: refatoração de código
+test: adição ou correção de testes
+chore: tarefas de manutenção
+
+# Exemplos
+feat: adiciona endpoint para buscar projetos por categoria
+fix: corrige validação de email no registro
+docs: atualiza README com novas instruções
+test: adiciona testes para ProjectService
+```
+
+#### **Estrutura de Branch**
+```bash
+# Nomenclatura
+feature/nome-da-feature    # Nova funcionalidade
+fix/nome-do-bug           # Correção de bug
+docs/nome-da-doc          # Documentação
+test/nome-do-teste        # Testes
+
+# Exemplos
+feature/user-profile-picture
+fix/jwt-token-expiration
+docs/api-documentation
+test/project-controller-integration
+```
+
+### 🧪 Qualidade e Testes
+
+#### **Cobertura de Testes**
+- Mantenha cobertura mínima de **80%**
+- Teste casos de sucesso e falha
+- Inclua testes de integração para endpoints
+
+#### **Checklist de PR**
+- [ ] Código compila sem warnings
+- [ ] Todos os testes passam
+- [ ] Cobertura de testes mantida
+- [ ] Documentação atualizada
+- [ ] Commits seguem padrão semântico
+- [ ] Branch atualizada com main
 
 ### 🎥 Processo de Revisão
 
-- **Todos os PRs são revisados ao vivo** no canal [BetGrave](https://www.youtube.com/@betgrave)! 📺
-- Acompanhe as **live coding sessions** para ver seu código sendo analisado
-- Em caso de conflitos durante a revisão, o autor será notificado para resolver
-- Se houver problemas técnicos identificados durante a live, trabalharemos juntos para solucioná-los
-- **Participe das lives** para aprender com outros contributors e melhorar suas skills!
+- **Pull Requests são revisados ao vivo** no canal [BetGrave](https://www.youtube.com/@betgrave)! 📺
+- **Horário das lives**: Todos os dias as 20:00 (horário de Brasília)
+
+## 🧪 Executando Testes
+
+A API possui testes unitários implementados para garantir qualidade e confiabilidade dos serviços.
+
+### Estrutura de Testes Atual
+
+O projeto atualmente contém:
+- **Testes de Service**: Foco nos serviços de negócio com mocks
+- **TestUtils**: Classe utilitária para criação de objetos de teste
+- **Testes Unitários**: Usando JUnit 5, Mockito e AssertJ
+
+### Comandos de Teste
+
+```bash
+# Executar todos os testes
+mvn test
+
+# Executar teste específico
+mvn test -Dtest=PermissionServiceTest
+
+# Executar testes com relatório detalhado
+mvn test -Dtest.verbose=true
+
+# Compilar sem executar testes
+mvn clean package -DskipTests
+```
+
+### Testes Implementados
+
+#### **Serviços de Usuário**
+- `PermissionServiceTest` - Testa gestão de permissões
+- `SystemRoleServiceTest` - Testa gestão de roles do sistema
+
+#### **Serviços de Projeto**
+- `ComplexityServiceTest` - Testa níveis de complexidade
+- `MemberServiceTest` - Testa gestão de membros
+- `MemberStatusServiceTest` - Testa status de membros
+- `ProjectServiceTest` - Testa gestão de projetos
+- `RoleServiceTest` - Testa roles de projeto
+- `StatusServiceTest` - Testa status de projetos
+- `ToolServiceTest` - Testa ferramentas
+- `TopicServiceTest` - Testa tópicos
+
+### Exemplo de Teste Atual
+
+Baseado na implementação existente:
+
+```java
+@ExtendWith(MockitoExtension.class)
+public class PermissionServiceTest {
+    
+    @Mock
+    private PermissionRepository permissionRepository;
+    
+    @InjectMocks
+    private PermissionService permissionService;
+    
+    @Test
+    public void shouldReturnAllPermissions_whenFindAllIsCalled() {
+        // GIVEN
+        List<Permission> permissions = List.of(
+            TestUtils.createPermission(1L, "create", "Pode criar algo"),
+            TestUtils.createPermission(2L, "delete", "Pode deletar algo")
+        );
+        Mockito.when(permissionRepository.findAll()).thenReturn(permissions);
+        
+        // WHEN
+        List<Permission> result = permissionService.findAll();
+        
+        // THEN
+        assertThat(result)
+            .hasSize(2)
+            .containsExactlyInAnyOrder(permissions.get(0), permissions.get(1));
+        Mockito.verify(permissionRepository, Mockito.times(1)).findAll();
+    }
+}
+```
+
+### TestUtils - Classe Utilitária
+
+O projeto inclui uma classe `TestUtils` para criação padronizada de objetos de teste:
+
+```java
+// Criar entidades para teste
+Permission permission = TestUtils.createPermission(1L, "create", "Descrição");
+User user = TestUtils.createUser(1L, "username", "João", "Silva", "email@test.com", role);
+Topic topic = TestUtils.createTopic(1L, "Frontend", "#FF5733", "Desenvolvimento frontend");
+```
+
+### Executando Testes Específicos
+
+```bash
+# Executar apenas testes de serviços de usuário
+mvn test -Dtest="com.m42hub.m42hub_api.services.user.*"
+
+# Executar apenas testes de serviços de projeto
+mvn test -Dtest="com.m42hub.m42hub_api.services.project.*"
+
+# Executar teste específico com logs detalhados
+mvn test -Dtest=PermissionServiceTest -Dlogging.level.com.m42hub=DEBUG
+```
 
 ## 🔧 Desenvolvimento
+
+### Configuração do Ambiente de Desenvolvimento
+
+1. **Configure seu IDE**
+   - Instale plugins do Lombok
+   - Configure formatação de código Java
+   - Configure auto-import para organizar imports
+
+2. **Banco de Desenvolvimento Local**
+   ```bash
+   # Criar banco PostgreSQL local
+   docker run -d \
+     --name postgres-dev \
+     -e POSTGRES_DB=m42hub \
+     -e POSTGRES_USER=postgres \
+     -e POSTGRES_PASSWORD=postgres \
+     -p 5432:5432 \
+     postgres:15
+   ```
+
+3. **Configuração de Variáveis**
+   ```bash
+   # Copiar arquivo de exemplo
+   cp example.env .env
+   
+   # Editar configurações locais
+   DATABASE_URL=jdbc:postgresql://localhost:5432/m42hub
+   DATABASE_USERNAME=postgres
+   DATABASE_PASSWORD=postgres
+   SECRET=your_secret_key_here
+   ```
 
 ### Migrações de Banco
 ```bash
 # Executar migrações
 mvn flyway:migrate
 
-# Verificar status
+# Verificar status das migrações
 mvn flyway:info
+
+# Validar migrações
+mvn flyway:validate
 
 # Limpar banco (cuidado!)
 mvn flyway:clean
+```
+
+### Debugging e Logs
+
+```bash
+# Executar em modo debug
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+
+# Executar com logs específicos
+mvn spring-boot:run -Dlogging.level.com.m42hub=DEBUG
+
+# Executar com perfil específico
+mvn spring-boot:run -Dspring.profiles.active=dev
 ```
 
 ## 🌍 Comunidade e Suporte
