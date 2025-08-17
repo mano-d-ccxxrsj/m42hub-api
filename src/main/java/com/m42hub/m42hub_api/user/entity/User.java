@@ -81,7 +81,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return username.toLowerCase();
     }
 
     @Override
@@ -104,4 +104,7 @@ public class User implements UserDetails {
         return isActive;
     }
 
+    public void setUsername(String username) {
+        this.username = username.toLowerCase();
+    }
 }

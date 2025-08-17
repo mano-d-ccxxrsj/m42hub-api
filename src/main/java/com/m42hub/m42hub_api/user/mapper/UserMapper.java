@@ -17,7 +17,7 @@ public class UserMapper {
 
         return User
                 .builder()
-                .username(request.username())
+                .username(request.username().toLowerCase())
                 .password(request.password())
                 .email(request.email())
                 .firstName(request.firstName())

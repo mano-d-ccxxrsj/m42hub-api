@@ -138,7 +138,15 @@ public class ProjectService {
             }
 
             if (updatedProject.getUnfilledRoles() != null) {
-                project.setUnfilledRoles(findUnfilledRoles(updatedProject.getUnfilledRoles()));
+
+                List<Role> unfilledRolesFound = findUnfilledRoles(updatedProject.getUnfilledRoles());
+
+                boolean hasFilledRole = unfilledRolesFound.stream()
+                        .anyMatch(role -> isRoleFilled(project, role));
+
+                if (hasFilledRole) return Optional.empty();
+
+                project.setUnfilledRoles(unfilledRolesFound);
             }
 
             repository.save(project);
