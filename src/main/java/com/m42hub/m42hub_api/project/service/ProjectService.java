@@ -1,5 +1,8 @@
 package com.m42hub.m42hub_api.project.service;
 
+import com.m42hub.m42hub_api.exceptions.ConflictException;
+import com.m42hub.m42hub_api.exceptions.UnauthorizedException;
+import com.m42hub.m42hub_api.exceptions.UsernameOrPasswordInvalidException;
 import com.m42hub.m42hub_api.project.entity.*;
 import com.m42hub.m42hub_api.project.repository.ProjectRepository;
 import com.m42hub.m42hub_api.project.specification.ProjectSpecification;
@@ -112,7 +115,7 @@ public class ProjectService {
         if(optProject.isPresent()) {
             Project project = optProject.get();
 
-            if (this.isNotManager(project, userId)) return Optional.empty();
+            if (this.isNotManager(project, userId)) throw new UnauthorizedException("Usuário que solicitou alteração não é o idealizador do projeto");
 
             if (updatedProject.getName() != null) project.setName(updatedProject.getName());
             if (updatedProject.getSummary() != null) project.setSummary(updatedProject.getSummary());
@@ -144,7 +147,7 @@ public class ProjectService {
                 boolean hasFilledRole = unfilledRolesFound.stream()
                         .anyMatch(role -> isRoleFilled(project, role));
 
-                if (hasFilledRole) return Optional.empty();
+                if (hasFilledRole) throw new ConflictException("Existem cargos que já estão preenchidos");
 
                 project.setUnfilledRoles(unfilledRolesFound);
             }
@@ -170,7 +173,7 @@ public class ProjectService {
             boolean hasFilledRole = unfilledRolesFound.stream()
                     .anyMatch(role -> isRoleFilled(project, role));
 
-            if (hasFilledRole) return Optional.empty();
+            if (hasFilledRole) throw new ConflictException("Existem cargos que já estão preenchidos");
 
             project.setUnfilledRoles(unfilledRolesFound);
 

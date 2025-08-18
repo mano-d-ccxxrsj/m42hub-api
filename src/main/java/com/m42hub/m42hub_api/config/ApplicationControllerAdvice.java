@@ -1,6 +1,7 @@
 package com.m42hub.m42hub_api.config;
 
 import com.m42hub.m42hub_api.exceptions.ConflictException;
+import com.m42hub.m42hub_api.exceptions.CustomNotFoundException;
 import com.m42hub.m42hub_api.exceptions.UnauthorizedException;
 import com.m42hub.m42hub_api.exceptions.UsernameOrPasswordInvalidException;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,6 +29,12 @@ public class ApplicationControllerAdvice {
     @ExceptionHandler(ConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public String handleConflictException(ConflictException exception) {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(CustomNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleCustomNotFoundException(CustomNotFoundException exception) {
         return exception.getMessage();
     }
 
