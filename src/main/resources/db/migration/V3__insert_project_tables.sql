@@ -56,7 +56,7 @@ INSERT INTO project_topics (
 
 -- Conteúdo e Educação
 ('Educação', 'Projetos com foco em ensino, aprendizado e didática.', '#F2994A'),
-('Documentação', 'Criação de conteúdo técnico e guias explicativos.', '#F2F2F2'),
+('Documentação', 'Criação de conteúdo técnico e guias explicativos.', '#A3A190'),
 ('Escrita Criativa', 'Textos, roteiros, histórias e conteúdo literário.', '#C0392B'),
 
 -- Sociedade e Comunidade
@@ -93,8 +93,7 @@ INSERT INTO project_roles (
 ('Desenvolvedor de Jogos', 'Implementa a lógica de jogos, física, animações e interações.'),
 
 -- Design
-('Designer de Interface (UI)', 'Cria a aparência visual da interface do usuário.'),
-('Designer de Experiência (UX)', 'Foca na usabilidade e experiência do usuário.'),
+('Designer UI/UX', 'Cria a aparência visual da interface do usuário.'),
 ('Designer de Jogos', 'Define mecânicas, regras e interações em jogos digitais.'),
 ('Designer Gráfico', 'Cria elementos visuais como logotipos, ilustrações e layouts.'),
 ('Designer de Animação (Motion)', 'Cria transições, animações e interações visuais.'),
@@ -161,12 +160,6 @@ INSERT INTO project_roles (
 ('Coordenador de Financiamento', 'Organiza campanhas de doação e busca recursos.'),
 ('Testador de Experiência', 'Testa produtos e dá feedback sobre usabilidade.'),
 ('Pesquisador de Usuário', 'Estuda como as pessoas interagem com o projeto.'),
-
--- Colaborações Gerais
-('Mentor', 'Orienta colaboradores com menos experiência.'),
-('Contribuidor(a)', 'Ajuda com melhorias, ideias ou execução de tarefas.'),
-('Mantenedor(a)', 'Gerencia o repositório e coordena a evolução do projeto.'),
-('Revisor(a)', 'Analisa contribuições e garante qualidade antes de publicar.');
 
 INSERT INTO project_tools (
    name,
