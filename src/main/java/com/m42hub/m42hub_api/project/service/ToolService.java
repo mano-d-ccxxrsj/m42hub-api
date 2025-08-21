@@ -18,7 +18,7 @@ public class ToolService {
 
     @Transactional(readOnly = true)
     public List<Tool> findAll() {
-        return repository.findAll();
+        return repository.findAllByOrderByNameAsc();
     }
 
     @Transactional(readOnly = true)

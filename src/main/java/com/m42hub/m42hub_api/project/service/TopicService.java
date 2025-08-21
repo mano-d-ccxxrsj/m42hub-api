@@ -18,7 +18,7 @@ public class TopicService {
 
     @Transactional(readOnly = true)
     public List<Topic> findAll() {
-        return repository.findAll();
+        return repository.findAllByOrderByNameAsc();
     }
 
     @Transactional(readOnly = true)

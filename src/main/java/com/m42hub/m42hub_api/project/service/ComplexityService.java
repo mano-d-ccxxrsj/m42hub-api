@@ -18,7 +18,7 @@ public class ComplexityService {
 
     @Transactional(readOnly = true)
     public List<Complexity> findAll() {
-        return repository.findAll();
+        return repository.findAllByOrderByNameAsc();
     }
 
     @Transactional(readOnly = true)

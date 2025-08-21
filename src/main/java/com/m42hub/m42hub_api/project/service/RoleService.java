@@ -18,7 +18,7 @@ public class RoleService {
 
     @Transactional(readOnly = true)
     public List<Role> findAll() {
-        return repository.findAll();
+        return repository.findAllByOrderByNameAsc();
     }
 
     @Transactional(readOnly = true)

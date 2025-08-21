@@ -17,7 +17,7 @@ public class StatusService {
 
     @Transactional(readOnly = true)
     public List<Status> findAll() {
-        return repository.findAll();
+        return repository.findAllByOrderByNameAsc();
     }
 
     @Transactional(readOnly = true)
