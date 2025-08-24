@@ -159,7 +159,7 @@ INSERT INTO project_roles (
 ('Consultor Jurídico', 'Orienta sobre licenças, uso de conteúdo e aspectos legais.'),
 ('Coordenador de Financiamento', 'Organiza campanhas de doação e busca recursos.'),
 ('Testador de Experiência', 'Testa produtos e dá feedback sobre usabilidade.'),
-('Pesquisador de Usuário', 'Estuda como as pessoas interagem com o projeto.'),
+('Pesquisador de Usuário', 'Estuda como as pessoas interagem com o projeto.');
 
 INSERT INTO project_tools (
    name,
