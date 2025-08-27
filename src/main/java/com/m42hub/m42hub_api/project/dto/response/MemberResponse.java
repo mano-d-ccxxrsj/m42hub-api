@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 public record MemberResponse(
         Long id,
         Boolean isManager,
-        Long project,
-        Long role,
+        Long projectId,
+        Long roleId,
         AuthenticatedUserResponse user,
         MemberStatusResponse memberStatus,
         String applicationMessage,
