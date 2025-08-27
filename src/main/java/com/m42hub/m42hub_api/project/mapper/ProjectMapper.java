@@ -176,4 +176,61 @@ public class ProjectMapper {
                 .build();
     }
 
+    public static ProjectListItemResponse toProjectListResponse(Project project) {
+
+        String statusName = project.getStatus() != null ? project.getStatus().getName() : null;
+        String complexityName = project.getComplexity() != null ? project.getComplexity().getName() : null;
+
+        List<String> toolNames = new ArrayList<>();
+        if (project.getTools() != null) {
+            toolNames = project.getTools()
+                    .stream()
+                    .map(Tool::getName)
+                    .toList();
+        }
+
+        List<String> topicNames = new ArrayList<>();
+        if (project.getTopics() != null) {
+            topicNames = project.getTopics()
+                    .stream()
+                    .map(Topic::getName)
+                    .toList();
+        }
+
+        List<String> unfilledRoleNames = new ArrayList<>();
+        if (project.getUnfilledRoles() != null) {
+            unfilledRoleNames = project.getUnfilledRoles()
+                    .stream()
+                    .map(Role::getName)
+                    .toList();
+        }
+
+        String manager = null;
+        if (project.getMembers() != null) {
+            manager = project.getMembers()
+                    .stream()
+                    .filter(Member::getIsManager)
+                    .map(member -> member.getUser().getUsername())
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        return ProjectListItemResponse
+                .builder()
+                .id(project.getId())
+                .name(project.getName())
+                .summary(project.getSummary())
+                .statusName(statusName)
+                .imageUrl(project.getImageUrl())
+                .complexityName(complexityName)
+                .creationDate(project.getCreatedAt())
+                .startDate(project.getStartDate())
+                .endDate(project.getEndDate())
+                .toolNames(toolNames)
+                .topicNames(topicNames)
+                .unfilledRoleNames(unfilledRoleNames)
+                .manager(manager)
+                .build();
+    }
+
 }

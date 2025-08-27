@@ -5,13 +5,12 @@ import com.m42hub.m42hub_api.project.dto.request.ChangeUnfilledRolesRequest;
 import com.m42hub.m42hub_api.project.dto.request.ProjectRequest;
 import com.m42hub.m42hub_api.project.dto.request.ProjectUpdateRequest;
 import com.m42hub.m42hub_api.project.dto.response.PageResponse;
+import com.m42hub.m42hub_api.project.dto.response.ProjectListItemResponse;
 import com.m42hub.m42hub_api.project.dto.response.ProjectResponse;
 import com.m42hub.m42hub_api.project.entity.Project;
 import com.m42hub.m42hub_api.project.mapper.PageMapper;
 import com.m42hub.m42hub_api.project.mapper.ProjectMapper;
 import com.m42hub.m42hub_api.project.service.ProjectService;
-import com.m42hub.m42hub_api.user.entity.User;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -46,7 +45,7 @@ public class ProjectController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<PageResponse<ProjectResponse>> findByParams(
+    public ResponseEntity<PageResponse<ProjectListItemResponse>> findByParams(
             @RequestParam(defaultValue = "0", required = false) Integer page,
             @RequestParam(defaultValue = "10", required = false) Integer limit,
             @RequestParam(defaultValue = "id", required = false) String sortBy,
@@ -59,7 +58,7 @@ public class ProjectController {
     ) {
         Page<Project> projectPage = projectService.findByParams(page, limit, sortBy, sortDirection, status, complexity, tools, topics, unfilledRoles);
 
-        PageResponse<ProjectResponse> response = PageMapper.toPagedResponse(projectPage, ProjectMapper::toProjectResponse);
+        PageResponse<ProjectListItemResponse> response = PageMapper.toPagedResponse(projectPage, ProjectMapper::toProjectListResponse);
 
         return  ResponseEntity.ok(response);
     }
