@@ -1,5 +1,6 @@
 package com.m42hub.m42hub_api.user.entity;
 
+import com.m42hub.m42hub_api.project.entity.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -44,6 +45,17 @@ public class User implements UserDetails {
     @Column(name = "profile_pic_url", columnDefinition = "TEXT")
     private String profilePicUrl;
 
+    private String biography;
+
+    private String discord;
+
+    private String linkedin;
+
+    private String github;
+
+    @Column(name = "personal_website")
+    private String personalWebsite;
+
     @Column(name = "is_active")
     private Boolean isActive;
 
@@ -55,6 +67,13 @@ public class User implements UserDetails {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @ManyToMany
+    @JoinTable(name = "user_interest_project_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "project_role_id")
+    )
+    private List<Role> interestRoles;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "system_role_id", referencedColumnName = "system_role_id", nullable = false)

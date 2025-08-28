@@ -1,5 +1,8 @@
 package com.m42hub.m42hub_api.user.mapper;
 
+import com.m42hub.m42hub_api.project.dto.response.RoleResponse;
+import com.m42hub.m42hub_api.project.entity.Role;
+import com.m42hub.m42hub_api.project.mapper.RoleMapper;
 import com.m42hub.m42hub_api.user.dto.request.UserRequest;
 import com.m42hub.m42hub_api.user.dto.response.AuthenticatedUserResponse;
 import com.m42hub.m42hub_api.user.dto.response.SystemRoleResponse;
@@ -7,6 +10,9 @@ import com.m42hub.m42hub_api.user.dto.response.UserResponse;
 import com.m42hub.m42hub_api.user.entity.SystemRole;
 import com.m42hub.m42hub_api.user.entity.User;
 import lombok.experimental.UtilityClass;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @UtilityClass
 public class UserMapper {
@@ -56,6 +62,14 @@ public class UserMapper {
             roleName = user.getSystemRole().getName();
         }
 
+        List<RoleResponse> interestedRoles = new ArrayList<>();
+        if (user.getInterestRoles() != null) {
+            interestedRoles = user.getInterestRoles()
+                    .stream()
+                    .map(RoleMapper::toRoleResponse)
+                    .toList();
+        }
+
         return AuthenticatedUserResponse
                 .builder()
                 .id(user.getId())
@@ -64,6 +78,12 @@ public class UserMapper {
                 .lastName(user.getLastName())
                 .roleId(roleId)
                 .roleName(roleName)
+                .biography(user.getBiography())
+                .discord(user.getDiscord())
+                .linkedin(user.getLinkedin())
+                .github(user.getGithub())
+                .personalWebsite(user.getPersonalWebsite())
+                .interestRoles(interestedRoles)
                 .build();
     }
 
