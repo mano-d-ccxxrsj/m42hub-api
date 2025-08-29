@@ -1,27 +1,26 @@
 package com.m42hub.m42hub_api.user.controller;
 
 import com.m42hub.m42hub_api.config.JWTUserData;
-import com.m42hub.m42hub_api.exceptions.UnauthorizedException;
-import com.m42hub.m42hub_api.project.mapper.ProjectMapper;
 import com.m42hub.m42hub_api.user.dto.request.UserInfoRequest;
+import com.m42hub.m42hub_api.user.dto.request.UserPasswordChangeRequest;
+import com.m42hub.m42hub_api.user.dto.request.UserProfilePicRequest;
 import com.m42hub.m42hub_api.user.dto.request.UserRequest;
 import com.m42hub.m42hub_api.user.dto.response.AuthenticatedUserResponse;
 import com.m42hub.m42hub_api.user.dto.response.UserResponse;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.mapper.UserMapper;
+import com.m42hub.m42hub_api.user.service.AuthService;
 import com.m42hub.m42hub_api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -29,6 +28,7 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
+    private final AuthService authService;
 
     @GetMapping()
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:get_all')")
@@ -47,31 +47,6 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:create')")
-    public ResponseEntity<UserResponse> save(@RequestBody UserRequest request) {
-        User newUser = UserMapper.toUser(request);
-        User savedUser = userService.save(newUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toUserResponse(savedUser));
-    }
-
-    @PatchMapping("/info/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:edit-info')")
-    public ResponseEntity<AuthenticatedUserResponse> editInfo(@PathVariable Long id, @RequestBody UserInfoRequest request) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
-
-        if (!Objects.equals(userData.id(), id)) {
-            throw new UnauthorizedException("Usuário não tem permissão para realizar esta ação");
-        }
-
-        return userService.editInfo(request, userData.id())
-                .map(user -> ResponseEntity.ok(UserMapper.toAuthenticatedUserResponse(user)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
     @GetMapping("/me")
     public ResponseEntity<AuthenticatedUserResponse> getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -85,4 +60,71 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:create')")
+    public ResponseEntity<UserResponse> save(@RequestBody UserRequest request) {
+        User newUser = UserMapper.toUser(request);
+        User savedUser = userService.save(newUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toUserResponse(savedUser));
+    }
+
+    @PatchMapping("/info/{username}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:edit-info')")
+    public ResponseEntity<AuthenticatedUserResponse> editInfo(@PathVariable String username, @RequestBody UserInfoRequest request) {
+        JWTUserData userData = authService.validateUserAccess(username);
+
+        return userService.editInfo(request, userData.id())
+                .map(user -> ResponseEntity.ok(UserMapper.toAuthenticatedUserResponse(user)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/profile-pic/{username}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:edit-profile-pic')")
+    public ResponseEntity<AuthenticatedUserResponse> changeProfilePic(@PathVariable String username, @RequestBody UserProfilePicRequest request) {
+        JWTUserData userData = authService.validateUserAccess(username);
+
+        return userService.changeProfilePic(request, userData.id())
+                .map(user -> ResponseEntity.ok(UserMapper.toAuthenticatedUserResponse(user)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/password/{username}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:edit-profile-pic')")
+    public ResponseEntity<AuthenticatedUserResponse> changePassword(@PathVariable String username, @RequestBody UserPasswordChangeRequest request) {
+        JWTUserData userData = authService.validateUserAccess(username);
+
+        ResponseCookie cookie = ResponseCookie.from("session", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return userService.changePassword(request, userData.id())
+                .map(user -> ResponseEntity.ok()
+                        .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                        .body(UserMapper.toAuthenticatedUserResponse(user))
+                )
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("deactivate/{username}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:deactivate')")
+    public ResponseEntity<UserResponse> deactivate(@PathVariable String username) {
+        JWTUserData userData = authService.validateUserAccess(username);
+
+        ResponseCookie cookie = ResponseCookie.from("session", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return userService.changeStatus(userData.id(), false)
+                .map(user -> ResponseEntity.ok()
+                        .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                        .body(UserMapper.toUserResponse(user))
+                )
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

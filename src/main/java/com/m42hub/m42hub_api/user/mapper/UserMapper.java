@@ -1,7 +1,6 @@
 package com.m42hub.m42hub_api.user.mapper;
 
 import com.m42hub.m42hub_api.project.dto.response.RoleResponse;
-import com.m42hub.m42hub_api.project.entity.Role;
 import com.m42hub.m42hub_api.project.mapper.RoleMapper;
 import com.m42hub.m42hub_api.user.dto.request.UserRequest;
 import com.m42hub.m42hub_api.user.dto.response.AuthenticatedUserResponse;
@@ -76,6 +75,7 @@ public class UserMapper {
                 .username(user.getUsername())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .profilePicUrl(user.getProfilePicUrl())
                 .roleId(roleId)
                 .roleName(roleName)
                 .biography(user.getBiography())

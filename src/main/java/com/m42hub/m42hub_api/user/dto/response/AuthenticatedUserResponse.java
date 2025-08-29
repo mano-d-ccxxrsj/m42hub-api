@@ -1,7 +1,6 @@
 package com.m42hub.m42hub_api.user.dto.response;
 
 import com.m42hub.m42hub_api.project.dto.response.RoleResponse;
-import com.m42hub.m42hub_api.project.entity.Role;
 import lombok.Builder;
 
 import java.util.List;
@@ -12,6 +11,7 @@ public record AuthenticatedUserResponse(
         String username,
         String firstName,
         String lastName,
+        String profilePicUrl,
         Long roleId,
         String roleName,
         String biography,
