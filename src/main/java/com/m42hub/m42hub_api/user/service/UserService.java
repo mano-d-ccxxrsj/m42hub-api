@@ -1,5 +1,6 @@
 package com.m42hub.m42hub_api.user.service;
 
+import com.m42hub.m42hub_api.file.service.ImgBBService;
 import com.m42hub.m42hub_api.project.entity.Role;
 import com.m42hub.m42hub_api.project.service.RoleService;
 import com.m42hub.m42hub_api.user.dto.request.UserInfoRequest;
@@ -14,6 +15,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +28,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final SystemRoleService systemRoleService;
     private final RoleService projectRoleService;
+    private final ImgBBService imgBBService;
     private final AuthenticationManager authenticationManager;
 
     @Transactional(readOnly = true)
@@ -35,6 +39,11 @@ public class UserService {
     @Transactional(readOnly = true)
     public Optional<User> findById(Long id) {
         return repository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<User> findByUsername(String username) {
+        return repository.findUserByUsername(username);
     }
 
     @Transactional
@@ -68,12 +77,13 @@ public class UserService {
         return Optional.empty();
     }
 
-    public Optional<User> changeProfilePic(UserProfilePicRequest request, Long userId) {
+    public Optional<User> changeProfilePic(MultipartFile file, Long userId) {
         Optional<User> optUser = repository.findById(userId);
         if (optUser.isPresent()) {
             User user = optUser.get();
 
-            user.setProfilePicUrl(request.profilePicUrl());
+            String imageUrl = imgBBService.uploadImage(file);
+            user.setProfilePicUrl(imageUrl);
 
             repository.save(user);
             return Optional.of(user);

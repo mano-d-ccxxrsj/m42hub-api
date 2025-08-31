@@ -20,3 +20,6 @@ cors:
   allowed-origins:
     http://localhost:4200
     https://www.m42hub.com
+
+imgBB:
+  upload-url: ${IMGBB_UPLOAD_URL}

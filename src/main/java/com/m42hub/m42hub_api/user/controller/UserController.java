@@ -3,9 +3,9 @@ package com.m42hub.m42hub_api.user.controller;
 import com.m42hub.m42hub_api.config.JWTUserData;
 import com.m42hub.m42hub_api.user.dto.request.UserInfoRequest;
 import com.m42hub.m42hub_api.user.dto.request.UserPasswordChangeRequest;
-import com.m42hub.m42hub_api.user.dto.request.UserProfilePicRequest;
 import com.m42hub.m42hub_api.user.dto.request.UserRequest;
 import com.m42hub.m42hub_api.user.dto.response.AuthenticatedUserResponse;
+import com.m42hub.m42hub_api.user.dto.response.UserInfoResponse;
 import com.m42hub.m42hub_api.user.dto.response.UserResponse;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.mapper.UserMapper;
@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -39,11 +40,19 @@ public class UserController {
                 .toList());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{username}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:get_by_username')")
+    public ResponseEntity<UserInfoResponse> getByUsername(@PathVariable String username) {
+        return userService.findByUsername(username)
+                .map(user -> ResponseEntity.ok(UserMapper.toUserInfoResponse(user)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/id/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:get_by_id')")
-    public ResponseEntity<UserResponse> getById(@PathVariable Long id) {
+    public ResponseEntity<AuthenticatedUserResponse> getById(@PathVariable Long id) {
         return userService.findById(id)
-                .map(user -> ResponseEntity.ok(UserMapper.toUserResponse(user)))
+                .map(user -> ResponseEntity.ok(UserMapper.toAuthenticatedUserResponse(user)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -70,40 +79,41 @@ public class UserController {
 
     @PatchMapping("/info/{username}")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:edit-info')")
-    public ResponseEntity<AuthenticatedUserResponse> editInfo(@PathVariable String username, @RequestBody UserInfoRequest request) {
+    public ResponseEntity<UserInfoResponse> editInfo(@PathVariable String username, @RequestBody UserInfoRequest request) {
         JWTUserData userData = authService.validateUserAccess(username);
 
         return userService.editInfo(request, userData.id())
-                .map(user -> ResponseEntity.ok(UserMapper.toAuthenticatedUserResponse(user)))
+                .map(user -> ResponseEntity.ok(UserMapper.toUserInfoResponse(user)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/profile-pic/{username}")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:change-profile-pic')")
-    public ResponseEntity<AuthenticatedUserResponse> changeProfilePic(@PathVariable String username, @RequestBody UserProfilePicRequest request) {
+    public ResponseEntity<UserInfoResponse> changeProfilePic(@PathVariable String username, @RequestParam("file") MultipartFile file) {
+
         JWTUserData userData = authService.validateUserAccess(username);
 
-        return userService.changeProfilePic(request, userData.id())
-                .map(user -> ResponseEntity.ok(UserMapper.toAuthenticatedUserResponse(user)))
+        return userService.changeProfilePic(file, userData.id())
+                .map(user -> ResponseEntity.ok(UserMapper.toUserInfoResponse(user)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/password/{username}")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:change-password')")
-    public ResponseEntity<AuthenticatedUserResponse> changePassword(@PathVariable String username, @RequestBody UserPasswordChangeRequest request) {
+    public ResponseEntity<UserInfoResponse> changePassword(@PathVariable String username, @RequestBody UserPasswordChangeRequest request) {
         JWTUserData userData = authService.validateUserAccess(username);
 
         ResponseCookie cookie = ResponseCookie.from("session", "")
                 .httpOnly(true)
                 .secure(false)
-                .path("/")ad
+                .path("/")
                 .maxAge(0)
                 .build();
 
         return userService.changePassword(request, userData.id())
                 .map(user -> ResponseEntity.ok()
                         .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                        .body(UserMapper.toAuthenticatedUserResponse(user))
+                        .body(UserMapper.toUserInfoResponse(user))
                 )
                 .orElse(ResponseEntity.notFound().build());
     }

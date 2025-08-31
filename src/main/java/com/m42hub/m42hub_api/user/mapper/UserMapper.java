@@ -1,10 +1,13 @@
 package com.m42hub.m42hub_api.user.mapper;
 
+import com.m42hub.m42hub_api.project.dto.response.ProjectListItemResponse;
 import com.m42hub.m42hub_api.project.dto.response.RoleResponse;
+import com.m42hub.m42hub_api.project.entity.Project;
 import com.m42hub.m42hub_api.project.mapper.RoleMapper;
 import com.m42hub.m42hub_api.user.dto.request.UserRequest;
 import com.m42hub.m42hub_api.user.dto.response.AuthenticatedUserResponse;
 import com.m42hub.m42hub_api.user.dto.response.SystemRoleResponse;
+import com.m42hub.m42hub_api.user.dto.response.UserInfoResponse;
 import com.m42hub.m42hub_api.user.dto.response.UserResponse;
 import com.m42hub.m42hub_api.user.entity.SystemRole;
 import com.m42hub.m42hub_api.user.entity.User;
@@ -61,6 +64,27 @@ public class UserMapper {
             roleName = user.getSystemRole().getName();
         }
 
+        return AuthenticatedUserResponse
+                .builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .profilePicUrl(user.getProfilePicUrl())
+                .roleId(roleId)
+                .roleName(roleName)
+                .build();
+    }
+
+    public static UserInfoResponse toUserInfoResponse(User user) {
+
+        Long roleId = null;
+        String roleName = null;
+        if (user.getSystemRole() != null) {
+            roleId = user.getSystemRole().getId();
+            roleName = user.getSystemRole().getName();
+        }
+
         List<RoleResponse> interestedRoles = new ArrayList<>();
         if (user.getInterestRoles() != null) {
             interestedRoles = user.getInterestRoles()
@@ -69,9 +93,8 @@ public class UserMapper {
                     .toList();
         }
 
-        return AuthenticatedUserResponse
+        return UserInfoResponse
                 .builder()
-                .id(user.getId())
                 .username(user.getUsername())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
