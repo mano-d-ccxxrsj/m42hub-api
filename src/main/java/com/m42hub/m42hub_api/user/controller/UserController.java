@@ -79,7 +79,7 @@ public class UserController {
     }
 
     @PatchMapping("/profile-pic/{username}")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:edit-profile-pic')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:change-profile-pic')")
     public ResponseEntity<AuthenticatedUserResponse> changeProfilePic(@PathVariable String username, @RequestBody UserProfilePicRequest request) {
         JWTUserData userData = authService.validateUserAccess(username);
 
@@ -89,14 +89,14 @@ public class UserController {
     }
 
     @PatchMapping("/password/{username}")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:edit-profile-pic')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:change-password')")
     public ResponseEntity<AuthenticatedUserResponse> changePassword(@PathVariable String username, @RequestBody UserPasswordChangeRequest request) {
         JWTUserData userData = authService.validateUserAccess(username);
 
         ResponseCookie cookie = ResponseCookie.from("session", "")
                 .httpOnly(true)
                 .secure(false)
-                .path("/")
+                .path("/")ad
                 .maxAge(0)
                 .build();
 
@@ -109,7 +109,7 @@ public class UserController {
     }
 
     @PatchMapping("deactivate/{username}")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:deactivate')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:self-deactivate')")
     public ResponseEntity<UserResponse> deactivate(@PathVariable String username) {
         JWTUserData userData = authService.validateUserAccess(username);
 
