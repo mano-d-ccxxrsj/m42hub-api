@@ -3,15 +3,11 @@ package com.m42hub.m42hub_api.project.controller;
 import com.m42hub.m42hub_api.config.JWTUserData;
 import com.m42hub.m42hub_api.project.dto.request.MemberRejectRequest;
 import com.m42hub.m42hub_api.project.dto.request.MemberRequest;
-import com.m42hub.m42hub_api.project.dto.request.RoleRequest;
+import com.m42hub.m42hub_api.project.dto.response.MemberProjectResponse;
 import com.m42hub.m42hub_api.project.dto.response.MemberResponse;
-import com.m42hub.m42hub_api.project.dto.response.RoleResponse;
 import com.m42hub.m42hub_api.project.entity.Member;
-import com.m42hub.m42hub_api.project.entity.Role;
 import com.m42hub.m42hub_api.project.mapper.MemberMapper;
-import com.m42hub.m42hub_api.project.mapper.RoleMapper;
 import com.m42hub.m42hub_api.project.service.MemberService;
-import com.m42hub.m42hub_api.project.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/project/member")
@@ -45,6 +40,15 @@ public class MemberController {
         return memberService.findById(id)
                 .map(member -> ResponseEntity.ok(MemberMapper.toMemberResponse(member)))
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/user/{username}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('member:get_by_username')")
+    public ResponseEntity<List<MemberProjectResponse>> getByUsername(@PathVariable String username) {
+        return ResponseEntity.ok(memberService.findByUsername(username)
+                .stream()
+                .map(MemberMapper::toMemberProjectsResponse)
+                .toList());
     }
 
     @PostMapping

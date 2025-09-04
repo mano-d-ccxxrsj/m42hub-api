@@ -35,6 +35,18 @@ public class MemberService {
         return repository.findById(id);
     }
 
+    @Transactional(readOnly = true)
+    public List<Member> findByUsername(String username) {
+        Optional<User> optUser = userService.findByUsername(username);
+        if (optUser.isEmpty()) {
+            throw new CustomNotFoundException("Usuário não encontrado");
+        }
+
+        User user = optUser.get();
+
+        return repository.findAllByUserId(user.getId());
+    }
+
     @Transactional
     public Member save(Member member) {
 
@@ -56,7 +68,8 @@ public class MemberService {
 
         Project project = optProject.get();
 
-        if (projectService.isNotManager(project, userId)) throw new UnauthorizedException("Usuário que solicitou alteração não é o idealizador do projeto");
+        if (projectService.isNotManager(project, userId))
+            throw new UnauthorizedException("Usuário que solicitou alteração não é o idealizador do projeto");
 
         if (projectService.isRoleFilled(project, member.getRole())) throw new ConflictException("Cargo já preenchido");
 
@@ -86,7 +99,8 @@ public class MemberService {
 
         Project project = optProject.get();
 
-        if (projectService.isNotManager(project, userId)) throw new UnauthorizedException("Usuário que solicitou alteração não é o idealizador do projeto");
+        if (projectService.isNotManager(project, userId))
+            throw new UnauthorizedException("Usuário que solicitou alteração não é o idealizador do projeto");
 
         MemberStatus rejectedStatus = MemberStatus.builder().id(3L).build();
 
@@ -95,7 +109,7 @@ public class MemberService {
 
         repository.save(member);
 
-        return  Optional.of(member);
+        return Optional.of(member);
     }
 
     @Transactional

@@ -1,10 +1,15 @@
 package com.m42hub.m42hub_api.project.mapper;
 
 import com.m42hub.m42hub_api.project.dto.request.MemberRequest;
-import com.m42hub.m42hub_api.project.dto.response.*;
-import com.m42hub.m42hub_api.project.entity.*;
+import com.m42hub.m42hub_api.project.dto.response.MemberProjectResponse;
+import com.m42hub.m42hub_api.project.dto.response.MemberResponse;
+import com.m42hub.m42hub_api.project.dto.response.MemberStatusResponse;
+import com.m42hub.m42hub_api.project.dto.response.ProjectListItemResponse;
+import com.m42hub.m42hub_api.project.entity.Member;
+import com.m42hub.m42hub_api.project.entity.MemberStatus;
+import com.m42hub.m42hub_api.project.entity.Project;
+import com.m42hub.m42hub_api.project.entity.Role;
 import com.m42hub.m42hub_api.user.dto.response.AuthenticatedUserResponse;
-import com.m42hub.m42hub_api.user.dto.response.UserResponse;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.mapper.UserMapper;
 import lombok.experimental.UtilityClass;
@@ -58,6 +63,25 @@ public class MemberMapper {
                 .id(member.getId())
                 .isManager(member.getIsManager())
                 .projectId(member.getProject().getId())
+                .roleId(member.getRole().getId())
+                .user(user)
+                .memberStatus(memberStatus)
+                .applicationMessage(member.getApplicationMessage())
+                .createdAt(member.getCreatedAt())
+                .build();
+    }
+
+    public static MemberProjectResponse toMemberProjectsResponse(Member member) {
+
+        AuthenticatedUserResponse user = member.getUser() != null ? UserMapper.toAuthenticatedUserResponse(member.getUser()) : null;
+        MemberStatusResponse memberStatus = member.getUser() != null ? MemberStatusMapper.toMemberStatusResponse(member.getMemberStatus()) : null;
+        ProjectListItemResponse projectListItem = member.getProject() != null ? ProjectMapper.toProjectListResponse(member.getProject()) : null;
+
+        return MemberProjectResponse
+                .builder()
+                .id(member.getId())
+                .isManager(member.getIsManager())
+                .projectListItem(projectListItem)
                 .roleId(member.getRole().getId())
                 .user(user)
                 .memberStatus(memberStatus)
