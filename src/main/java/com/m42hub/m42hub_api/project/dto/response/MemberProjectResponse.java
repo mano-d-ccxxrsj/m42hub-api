@@ -11,7 +11,7 @@ public record MemberProjectResponse(
         Long id,
         Boolean isManager,
         ProjectListItemResponse projectListItem,
-        Long roleId,
+        RoleResponse role,
         AuthenticatedUserResponse user,
         MemberStatusResponse memberStatus,
         String applicationMessage,
