@@ -24,6 +24,10 @@ public record ProjectResponse(
         List<ToolResponse> tools,
         List<TopicResponse> topics,
         List<RoleResponse> unfilledRoles,
-        List<MemberResponse> members
+        List<MemberResponse> members,
+        String discord,
+        String github,
+        String projectWebsite
+
 ) {
 }

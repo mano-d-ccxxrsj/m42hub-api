@@ -11,6 +11,8 @@ import com.m42hub.m42hub_api.project.entity.Project;
 import com.m42hub.m42hub_api.project.mapper.PageMapper;
 import com.m42hub.m42hub_api.project.mapper.ProjectMapper;
 import com.m42hub.m42hub_api.project.service.ProjectService;
+import com.m42hub.m42hub_api.user.dto.response.UserInfoResponse;
+import com.m42hub.m42hub_api.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -97,6 +100,18 @@ public class ProjectController {
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
 
         return projectService.changeUnfilledRoles(id,request.unfilledRoles(), userData.id())
+                .map(project -> ResponseEntity.ok(ProjectMapper.toProjectResponse(project)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/project-banner/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:change-project-banner')")
+    public ResponseEntity<ProjectResponse> changeProjectBanner(@PathVariable Long projectId, @RequestParam("file") MultipartFile file) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+
+        return projectService.changeProjectBanner(file, projectId, userData.id())
                 .map(project -> ResponseEntity.ok(ProjectMapper.toProjectResponse(project)))
                 .orElse(ResponseEntity.notFound().build());
     }

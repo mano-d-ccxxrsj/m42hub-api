@@ -17,6 +17,9 @@ public record ProjectUpdateRequest(
         Date endDate,
         List<Long> toolIds,
         List<Long> topicIds,
-        List<Long> unfilledRoleIds
+        List<Long> unfilledRoleIds,
+        String discord,
+        String github,
+        String projectWebsite
 ) {
 }
