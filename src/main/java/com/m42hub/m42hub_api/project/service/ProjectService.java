@@ -126,6 +126,9 @@ public class ProjectService {
             if (updatedProject.getImageUrl() != null) project.setImageUrl(updatedProject.getImageUrl());
             if (updatedProject.getStartDate() != null) project.setStartDate(updatedProject.getStartDate());
             if (updatedProject.getEndDate() != null) project.setEndDate(updatedProject.getEndDate());
+            if (updatedProject.getDiscord() != null) project.setDiscord(updatedProject.getDiscord());
+            if (updatedProject.getGithub() != null) project.setGithub(updatedProject.getGithub());
+            if (updatedProject.getProjectWebsite() != null) project.setProjectWebsite(updatedProject.getProjectWebsite());
 
             if (updatedProject.getStatus() != null) {
                 project.setStatus(findStatus(updatedProject.getStatus()));

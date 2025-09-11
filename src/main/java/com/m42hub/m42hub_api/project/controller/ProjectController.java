@@ -104,14 +104,14 @@ public class ProjectController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PatchMapping("/project-banner/{id}")
+    @PatchMapping("/banner/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:change-project-banner')")
-    public ResponseEntity<ProjectResponse> changeProjectBanner(@PathVariable Long projectId, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ProjectResponse> changeProjectBanner(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
 
-        return projectService.changeProjectBanner(file, projectId, userData.id())
+        return projectService.changeProjectBanner(file, id, userData.id())
                 .map(project -> ResponseEntity.ok(ProjectMapper.toProjectResponse(project)))
                 .orElse(ResponseEntity.notFound().build());
     }
