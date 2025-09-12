@@ -3,6 +3,7 @@ package com.m42hub.m42hub_api.project.service;
 import com.m42hub.m42hub_api.exceptions.ConflictException;
 import com.m42hub.m42hub_api.exceptions.UnauthorizedException;
 import com.m42hub.m42hub_api.exceptions.UsernameOrPasswordInvalidException;
+import com.m42hub.m42hub_api.file.service.ImgBBService;
 import com.m42hub.m42hub_api.project.entity.*;
 import com.m42hub.m42hub_api.project.repository.ProjectRepository;
 import com.m42hub.m42hub_api.project.specification.ProjectSpecification;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +36,7 @@ public class ProjectService {
     private final RoleService roleService;
     private final MemberStatusService memberStatusService;
     private final UserService userService;
+    private final ImgBBService imgBBService;
 
 
     @Transactional(readOnly = true)
@@ -123,6 +126,9 @@ public class ProjectService {
             if (updatedProject.getImageUrl() != null) project.setImageUrl(updatedProject.getImageUrl());
             if (updatedProject.getStartDate() != null) project.setStartDate(updatedProject.getStartDate());
             if (updatedProject.getEndDate() != null) project.setEndDate(updatedProject.getEndDate());
+            if (updatedProject.getDiscord() != null) project.setDiscord(updatedProject.getDiscord());
+            if (updatedProject.getGithub() != null) project.setGithub(updatedProject.getGithub());
+            if (updatedProject.getProjectWebsite() != null) project.setProjectWebsite(updatedProject.getProjectWebsite());
 
             if (updatedProject.getStatus() != null) {
                 project.setStatus(findStatus(updatedProject.getStatus()));
@@ -170,6 +176,8 @@ public class ProjectService {
             List<Role> unfilledRolesFound = findUnfilledRoles(unfilledRoles);
             Project project = optProject.get();
 
+            if (this.isNotManager(project, userId)) throw new UnauthorizedException("Usuário que solicitou alteração não é o idealizador do projeto");
+
             boolean hasFilledRole = unfilledRolesFound.stream()
                     .anyMatch(role -> isRoleFilled(project, role));
 
@@ -181,6 +189,22 @@ public class ProjectService {
             return Optional.of(project);
         }
 
+        return Optional.empty();
+    }
+
+    public Optional<Project> changeProjectBanner(MultipartFile file, Long projectId, Long userId) {
+        Optional<Project> optProject = repository.findById(projectId);
+        if (optProject.isPresent()) {
+            Project project = optProject.get();
+
+            if (this.isNotManager(project, userId)) throw new UnauthorizedException("Usuário que solicitou alteração não é o idealizador do projeto");
+
+            String imageUrl = imgBBService.uploadImage(file);
+            project.setImageUrl(imageUrl);
+
+            repository.save(project);
+            return Optional.of(project);
+        }
         return Optional.empty();
     }
 

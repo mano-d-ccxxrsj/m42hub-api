@@ -45,6 +45,9 @@ public class User implements UserDetails {
     @Column(name = "profile_pic_url", columnDefinition = "TEXT")
     private String profilePicUrl;
 
+    @Column(name = "profile_banner_url", columnDefinition = "TEXT")
+    private String profileBannerUrl;
+
     private String biography;
 
     private String discord;

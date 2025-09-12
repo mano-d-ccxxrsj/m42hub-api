@@ -27,7 +27,10 @@ public record ProjectRequest(
         @NotBlank(message = "É necessário informar ao cargo a ser preenchido")
         List<Long> unfilledRoleIds,
         @NotBlank(message = "É necessário informar o cargo do manager")
-        Long managerRoleId
+        Long managerRoleId,
+        String discord,
+        String github,
+        String projectWebsite
 
 ) {
 }

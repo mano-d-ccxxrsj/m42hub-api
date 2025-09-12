@@ -52,6 +52,9 @@ public class ProjectMapper {
                 .tools(tools)
                 .topics(topics)
                 .unfilledRoles(unfilledRoles)
+                .discord(request.discord())
+                .github(request.github())
+                .projectWebsite(request.projectWebsite())
                 .build();
 
         Member memberManager = Member.builder()
@@ -116,6 +119,9 @@ public class ProjectMapper {
                 .tools(tools)
                 .topics(topics)
                 .unfilledRoles(unfilledRoles)
+                .discord(request.discord())
+                .github(request.github())
+                .projectWebsite(request.projectWebsite())
                 .build();
 
     }
@@ -173,6 +179,9 @@ public class ProjectMapper {
                 .topics(topics)
                 .unfilledRoles(unfilledRoles)
                 .members(members)
+                .discord(project.getDiscord())
+                .github(project.getGithub())
+                .projectWebsite(project.getProjectWebsite())
                 .build();
     }
 
@@ -230,6 +239,9 @@ public class ProjectMapper {
                 .topicNames(topicNames)
                 .unfilledRoleNames(unfilledRoleNames)
                 .manager(manager)
+                .discord(project.getDiscord())
+                .github(project.getGithub())
+                .projectWebsite(project.getProjectWebsite())
                 .build();
     }
 

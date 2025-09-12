@@ -1,8 +1,6 @@
 package com.m42hub.m42hub_api.user.mapper;
 
-import com.m42hub.m42hub_api.project.dto.response.ProjectListItemResponse;
 import com.m42hub.m42hub_api.project.dto.response.RoleResponse;
-import com.m42hub.m42hub_api.project.entity.Project;
 import com.m42hub.m42hub_api.project.mapper.RoleMapper;
 import com.m42hub.m42hub_api.user.dto.request.UserRequest;
 import com.m42hub.m42hub_api.user.dto.response.AuthenticatedUserResponse;
@@ -30,7 +28,6 @@ public class UserMapper {
                 .email(request.email())
                 .firstName(request.firstName())
                 .lastName(request.lastName())
-                .profilePicUrl(request.profilePicUrl())
                 .isActive(request.isActive())
                 .systemRole(systemRole)
                 .build();
@@ -71,6 +68,7 @@ public class UserMapper {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .profilePicUrl(user.getProfilePicUrl())
+                .profileBannerUrl(user.getProfileBannerUrl())
                 .roleId(roleId)
                 .roleName(roleName)
                 .build();
@@ -99,6 +97,7 @@ public class UserMapper {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .profilePicUrl(user.getProfilePicUrl())
+                .profileBannerUrl(user.getProfileBannerUrl())
                 .roleId(roleId)
                 .roleName(roleName)
                 .biography(user.getBiography())

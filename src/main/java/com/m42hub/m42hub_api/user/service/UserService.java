@@ -5,7 +5,6 @@ import com.m42hub.m42hub_api.project.entity.Role;
 import com.m42hub.m42hub_api.project.service.RoleService;
 import com.m42hub.m42hub_api.user.dto.request.UserInfoRequest;
 import com.m42hub.m42hub_api.user.dto.request.UserPasswordChangeRequest;
-import com.m42hub.m42hub_api.user.dto.request.UserProfilePicRequest;
 import com.m42hub.m42hub_api.user.entity.SystemRole;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.repository.UserRepository;
@@ -84,6 +83,20 @@ public class UserService {
 
             String imageUrl = imgBBService.uploadImage(file);
             user.setProfilePicUrl(imageUrl);
+
+            repository.save(user);
+            return Optional.of(user);
+        }
+        return Optional.empty();
+    }
+
+    public Optional<User> changeProfileBanner(MultipartFile file, Long userId) {
+        Optional<User> optUser = repository.findById(userId);
+        if (optUser.isPresent()) {
+            User user = optUser.get();
+
+            String imageUrl = imgBBService.uploadImage(file);
+            user.setProfileBannerUrl(imageUrl);
 
             repository.save(user);
             return Optional.of(user);
