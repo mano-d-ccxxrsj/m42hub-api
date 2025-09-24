@@ -5,7 +5,6 @@ import com.m42hub.m42hub_api.project.entity.Role;
 import com.m42hub.m42hub_api.project.service.RoleService;
 import com.m42hub.m42hub_api.user.dto.request.UserInfoRequest;
 import com.m42hub.m42hub_api.user.dto.request.UserPasswordChangeRequest;
-import com.m42hub.m42hub_api.user.dto.request.UserProfilePicRequest;
 import com.m42hub.m42hub_api.user.entity.SystemRole;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.repository.UserRepository;

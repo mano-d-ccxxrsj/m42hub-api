@@ -8,6 +8,7 @@ import com.m42hub.m42hub_api.project.dto.response.MemberResponse;
 import com.m42hub.m42hub_api.project.entity.Member;
 import com.m42hub.m42hub_api.project.mapper.MemberMapper;
 import com.m42hub.m42hub_api.project.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,7 +54,7 @@ public class MemberController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('member:create')")
-    public ResponseEntity<MemberResponse> save(@RequestBody MemberRequest request) {
+    public ResponseEntity<MemberResponse> save(@RequestBody @Valid MemberRequest request) {
         Member newMember = MemberMapper.toMember(request);
         Member savedMember = memberService.save(newMember);
         return ResponseEntity.status(HttpStatus.CREATED).body(MemberMapper.toMemberResponse(savedMember));
@@ -61,7 +62,7 @@ public class MemberController {
 
     @PostMapping("/apply")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('member:create')")
-    public ResponseEntity<MemberResponse> apply(@RequestBody MemberRequest request) {
+    public ResponseEntity<MemberResponse> apply(@RequestBody @Valid MemberRequest request) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -86,7 +87,7 @@ public class MemberController {
 
     @PatchMapping("/reject/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('member:reject')")
-    public ResponseEntity<MemberResponse> reject(@PathVariable Long id, @RequestBody MemberRejectRequest request) {
+    public ResponseEntity<MemberResponse> reject(@PathVariable Long id, @RequestBody @Valid MemberRejectRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();

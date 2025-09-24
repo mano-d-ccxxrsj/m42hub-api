@@ -6,10 +6,10 @@ import com.m42hub.m42hub_api.user.dto.request.LoginRequest;
 import com.m42hub.m42hub_api.user.dto.request.UserRequest;
 import com.m42hub.m42hub_api.user.dto.response.AuthenticatedUserResponse;
 import com.m42hub.m42hub_api.user.dto.response.LoginResponse;
-import com.m42hub.m42hub_api.user.dto.response.UserResponse;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.mapper.UserMapper;
 import com.m42hub.m42hub_api.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -36,7 +36,7 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
         try {
 
             UsernamePasswordAuthenticationToken usernameAndPassword = new UsernamePasswordAuthenticationToken(request.username().toLowerCase(), request.password());
@@ -59,7 +59,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticatedUserResponse> save(@RequestBody UserRequest request) {
+    public ResponseEntity<AuthenticatedUserResponse> save(@RequestBody @Valid UserRequest request) {
         User newUser = UserMapper.toUser(request);
         User savedUser = userService.save(newUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toAuthenticatedUserResponse(savedUser));

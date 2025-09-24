@@ -1,7 +1,5 @@
 package com.m42hub.m42hub_api.user.dto.request;
 
-import com.m42hub.m42hub_api.project.entity.Role;
-
 import java.util.List;
 
 public record UserInfoRequest(

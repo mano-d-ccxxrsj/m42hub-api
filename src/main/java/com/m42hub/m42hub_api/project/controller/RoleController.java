@@ -5,6 +5,7 @@ import com.m42hub.m42hub_api.project.dto.response.RoleResponse;
 import com.m42hub.m42hub_api.project.entity.Role;
 import com.m42hub.m42hub_api.project.mapper.RoleMapper;
 import com.m42hub.m42hub_api.project.service.RoleService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class RoleController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('role:create')")
-    public ResponseEntity<RoleResponse> save(@RequestBody RoleRequest request) {
+    public ResponseEntity<RoleResponse> save(@RequestBody @Valid RoleRequest request) {
         Role newRole = RoleMapper.toRole(request);
         Role savedRole = roleService.save(newRole);
         return ResponseEntity.status(HttpStatus.CREATED).body(RoleMapper.toRoleResponse(savedRole));

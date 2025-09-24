@@ -11,6 +11,7 @@ import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.mapper.UserMapper;
 import com.m42hub.m42hub_api.user.service.AuthService;
 import com.m42hub.m42hub_api.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -71,7 +72,7 @@ public class UserController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:create')")
-    public ResponseEntity<UserResponse> save(@RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> save(@RequestBody @Valid UserRequest request) {
         User newUser = UserMapper.toUser(request);
         User savedUser = userService.save(newUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toUserResponse(savedUser));
@@ -79,7 +80,7 @@ public class UserController {
 
     @PatchMapping("/info/{username}")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:edit-info')")
-    public ResponseEntity<UserInfoResponse> editInfo(@PathVariable String username, @RequestBody UserInfoRequest request) {
+    public ResponseEntity<UserInfoResponse> editInfo(@PathVariable String username, @RequestBody @Valid UserInfoRequest request) {
         JWTUserData userData = authService.validateUserAccess(username);
 
         return userService.editInfo(request, userData.id())
@@ -100,7 +101,7 @@ public class UserController {
 
     @PatchMapping("/password/{username}")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:change-password')")
-    public ResponseEntity<UserInfoResponse> changePassword(@PathVariable String username, @RequestBody UserPasswordChangeRequest request) {
+    public ResponseEntity<UserInfoResponse> changePassword(@PathVariable String username, @RequestBody @Valid UserPasswordChangeRequest request) {
         JWTUserData userData = authService.validateUserAccess(username);
 
         ResponseCookie cookie = ResponseCookie.from("session", "")

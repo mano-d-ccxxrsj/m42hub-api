@@ -11,6 +11,7 @@ import com.m42hub.m42hub_api.project.entity.Project;
 import com.m42hub.m42hub_api.project.mapper.PageMapper;
 import com.m42hub.m42hub_api.project.mapper.ProjectMapper;
 import com.m42hub.m42hub_api.project.service.ProjectService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -60,12 +61,12 @@ public class ProjectController {
 
         PageResponse<ProjectListItemResponse> response = PageMapper.toPagedResponse(projectPage, ProjectMapper::toProjectListResponse);
 
-        return  ResponseEntity.ok(response);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('project:create')")
-    public ResponseEntity<ProjectResponse> save(@RequestBody ProjectRequest request) {
+    public ResponseEntity<ProjectResponse> save(@RequestBody @Valid ProjectRequest request) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -78,7 +79,7 @@ public class ProjectController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('project:update')")
-    public ResponseEntity<ProjectResponse> update(@PathVariable long id, @RequestBody ProjectUpdateRequest request) {
+    public ResponseEntity<ProjectResponse> update(@PathVariable long id, @RequestBody @Valid ProjectUpdateRequest request) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -91,12 +92,12 @@ public class ProjectController {
 
     @PatchMapping("/unfilled-roles/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('project:change_unfilled_roles')")
-    public ResponseEntity<ProjectResponse> changeUnfilledRoles(@PathVariable Long id, @RequestBody ChangeUnfilledRolesRequest request) {
+    public ResponseEntity<ProjectResponse> changeUnfilledRoles(@PathVariable Long id, @RequestBody @Valid ChangeUnfilledRolesRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
 
-        return projectService.changeUnfilledRoles(id,request.unfilledRoles(), userData.id())
+        return projectService.changeUnfilledRoles(id, request.unfilledRoles(), userData.id())
                 .map(project -> ResponseEntity.ok(ProjectMapper.toProjectResponse(project)))
                 .orElse(ResponseEntity.notFound().build());
     }

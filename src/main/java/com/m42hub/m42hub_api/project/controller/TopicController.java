@@ -6,6 +6,7 @@ import com.m42hub.m42hub_api.project.dto.response.TopicResponse;
 import com.m42hub.m42hub_api.project.entity.Topic;
 import com.m42hub.m42hub_api.project.mapper.TopicMapper;
 import com.m42hub.m42hub_api.project.service.TopicService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class TopicController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('topic:create')")
-    public ResponseEntity<TopicResponse> save(@RequestBody TopicRequest request) {
+    public ResponseEntity<TopicResponse> save(@RequestBody @Valid TopicRequest request) {
         Topic newTopic = TopicMapper.toTopic(request);
         Topic savedTopic = topicService.save(newTopic);
         return ResponseEntity.status(HttpStatus.CREATED).body(TopicMapper.toTopicResponse(savedTopic));
@@ -46,7 +47,7 @@ public class TopicController {
 
     @PatchMapping("/color/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('topic:change_color')")
-    public ResponseEntity<TopicResponse> changeColor(@PathVariable Long id, @RequestBody ChangeColorRequest request) {
+    public ResponseEntity<TopicResponse> changeColor(@PathVariable Long id, @RequestBody @Valid ChangeColorRequest request) {
         return topicService.changeColor(id, request.hexColor())
                 .map(topic -> ResponseEntity.ok(TopicMapper.toTopicResponse(topic)))
                 .orElse(ResponseEntity.notFound().build());

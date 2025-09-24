@@ -5,6 +5,7 @@ import com.m42hub.m42hub_api.project.dto.response.MemberStatusResponse;
 import com.m42hub.m42hub_api.project.entity.MemberStatus;
 import com.m42hub.m42hub_api.project.mapper.MemberStatusMapper;
 import com.m42hub.m42hub_api.project.service.MemberStatusService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +40,7 @@ public class MemberStatusController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('status:create')")
-    public ResponseEntity<MemberStatusResponse> save(@RequestBody MemberStatusRequest request) {
+    public ResponseEntity<MemberStatusResponse> save(@RequestBody @Valid MemberStatusRequest request) {
         MemberStatus newMemberStatus = MemberStatusMapper.toMemberStatus(request);
         MemberStatus savedMemberStatus = memberStatusService.save(newMemberStatus);
         return ResponseEntity.status(HttpStatus.CREATED).body(MemberStatusMapper.toMemberStatusResponse(savedMemberStatus));

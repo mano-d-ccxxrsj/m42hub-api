@@ -5,6 +5,7 @@ import com.m42hub.m42hub_api.project.dto.response.ComplexityResponse;
 import com.m42hub.m42hub_api.project.entity.Complexity;
 import com.m42hub.m42hub_api.project.mapper.ComplexityMapper;
 import com.m42hub.m42hub_api.project.service.ComplexityService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,12 +38,11 @@ public class ComplexityController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('complexity:create')")
-    public ResponseEntity<ComplexityResponse>  save(@RequestBody ComplexityRequest request) {
+    public ResponseEntity<ComplexityResponse> save(@RequestBody @Valid ComplexityRequest request) {
         Complexity newComplexity = ComplexityMapper.toComplexity(request);
         Complexity savedComplexity = complexityService.save(newComplexity);
         return ResponseEntity.status(HttpStatus.CREATED).body(ComplexityMapper.toComplexityResponse(savedComplexity));
     }
-
 
 
 }

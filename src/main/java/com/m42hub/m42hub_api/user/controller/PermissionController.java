@@ -5,6 +5,7 @@ import com.m42hub.m42hub_api.user.dto.response.PermissionResponse;
 import com.m42hub.m42hub_api.user.entity.Permission;
 import com.m42hub.m42hub_api.user.mapper.PermissionMapper;
 import com.m42hub.m42hub_api.user.service.PermissionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +40,7 @@ public class PermissionController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('permission:create')")
-    public ResponseEntity<PermissionResponse> save(@RequestBody PermissionRequest request) {
+    public ResponseEntity<PermissionResponse> save(@RequestBody @Valid PermissionRequest request) {
         Permission newPermission = PermissionMapper.toPermission(request);
         Permission savedPermission = permissionService.save(newPermission);
         return ResponseEntity.status(HttpStatus.CREATED).body(PermissionMapper.toPermissionResponse(savedPermission));
