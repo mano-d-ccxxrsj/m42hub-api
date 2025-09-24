@@ -99,6 +99,18 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PatchMapping("/profile-banner/{username}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:change-profile-banner')")
+    public ResponseEntity<UserInfoResponse> changeProfileBanner(@PathVariable String username, @RequestParam("file") MultipartFile file) {
+
+        JWTUserData userData = authService.validateUserAccess(username);
+
+        return userService.changeProfileBanner(file, userData.id())
+                .map(user -> ResponseEntity.ok(UserMapper.toUserInfoResponse(user)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+
     @PatchMapping("/password/{username}")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:change-password')")
     public ResponseEntity<UserInfoResponse> changePassword(@PathVariable String username, @RequestBody @Valid UserPasswordChangeRequest request) {

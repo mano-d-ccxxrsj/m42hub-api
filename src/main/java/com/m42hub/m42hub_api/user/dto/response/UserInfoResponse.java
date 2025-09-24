@@ -12,6 +12,7 @@ public record UserInfoResponse(
         String firstName,
         String lastName,
         String profilePicUrl,
+        String profileBannerUrl,
         Long roleId,
         String roleName,
         String biography,

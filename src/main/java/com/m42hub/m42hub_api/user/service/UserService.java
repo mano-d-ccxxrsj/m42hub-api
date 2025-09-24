@@ -90,6 +90,20 @@ public class UserService {
         return Optional.empty();
     }
 
+    public Optional<User> changeProfileBanner(MultipartFile file, Long userId) {
+        Optional<User> optUser = repository.findById(userId);
+        if (optUser.isPresent()) {
+            User user = optUser.get();
+
+            String imageUrl = imgBBService.uploadImage(file);
+            user.setProfileBannerUrl(imageUrl);
+
+            repository.save(user);
+            return Optional.of(user);
+        }
+        return Optional.empty();
+    }
+
     public Optional<User> changePassword(UserPasswordChangeRequest request, Long userId) {
         Optional<User> optUser = repository.findById(userId);
         if (optUser.isPresent()) {

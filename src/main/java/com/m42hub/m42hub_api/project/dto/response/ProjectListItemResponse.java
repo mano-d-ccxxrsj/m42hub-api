@@ -22,6 +22,9 @@ public record ProjectListItemResponse(
         List<String> toolNames,
         List<String> topicNames,
         List<String> unfilledRoleNames,
-        String manager
+        String manager,
+        String discord,
+        String github,
+        String projectWebsite
 ) {
 }

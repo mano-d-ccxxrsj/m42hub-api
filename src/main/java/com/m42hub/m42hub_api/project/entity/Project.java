@@ -51,6 +51,13 @@ public class Project {
     @Temporal(TemporalType.DATE)
     private Date endDate;
 
+    private String discord;
+
+    private String github;
+
+    @Column(name = "project_website")
+    private String projectWebsite;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

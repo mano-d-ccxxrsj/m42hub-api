@@ -20,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -98,6 +99,18 @@ public class ProjectController {
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
 
         return projectService.changeUnfilledRoles(id, request.unfilledRoles(), userData.id())
+                .map(project -> ResponseEntity.ok(ProjectMapper.toProjectResponse(project)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/banner/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:change-project-banner')")
+    public ResponseEntity<ProjectResponse> changeProjectBanner(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+
+        return projectService.changeProjectBanner(file, id, userData.id())
                 .map(project -> ResponseEntity.ok(ProjectMapper.toProjectResponse(project)))
                 .orElse(ResponseEntity.notFound().build());
     }

@@ -12,6 +12,7 @@ public record AuthenticatedUserResponse(
         String firstName,
         String lastName,
         String profilePicUrl,
+        String profileBannerUrl,
         Long roleId,
         String roleName
 ) {
