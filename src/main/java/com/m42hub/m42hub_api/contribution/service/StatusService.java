@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@Service("contributionStatusService")
 @RequiredArgsConstructor
 public class StatusService {
 

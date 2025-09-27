@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@Entity
+@Entity(name = "contributionStatus")
 @Table(name = "contribution_statuses")
 public class Status {
 

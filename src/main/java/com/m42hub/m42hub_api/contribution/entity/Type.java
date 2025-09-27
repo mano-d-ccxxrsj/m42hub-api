@@ -2,13 +2,14 @@ package com.m42hub.m42hub_api.contribution.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.web.bind.annotation.RestController;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@Entity
+@Entity(name = "contributionType")
 @Table(name = "contribution_types")
 public class Type {
 

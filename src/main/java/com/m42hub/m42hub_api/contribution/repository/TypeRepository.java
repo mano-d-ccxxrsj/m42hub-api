@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
+@Repository("contributionTypeRepository")
 public interface TypeRepository extends JpaRepository<Type, Long> {
     List<Type> findAllByOrderByNameAsc();
 }

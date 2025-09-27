@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@RestController("contributionStatusController")
 @RequestMapping("/api/v1/contribution/status")
 @RequiredArgsConstructor
 public class StatusController {
