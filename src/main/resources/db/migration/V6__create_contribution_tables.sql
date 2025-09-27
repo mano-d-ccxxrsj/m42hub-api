@@ -54,7 +54,7 @@ CREATE TABLE donations (
     user_id INT REFERENCES users(user_id) NOT NULL,
     name VARCHAR(255) NOT NULL,
     summary VARCHAR(255) NOT NULL,
-    description TEXT NOT NULL,
+    description TEXT,
     amount DECIMAL(12, 4),
     currency CHAR(3) DEFAULT 'BRL',
     status_id INT REFERENCES donation_statuses(donation_status_id) NOT NULL DEFAULT 1,
