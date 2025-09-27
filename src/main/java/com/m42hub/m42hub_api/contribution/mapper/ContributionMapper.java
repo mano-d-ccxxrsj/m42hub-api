@@ -47,6 +47,8 @@ public class ContributionMapper {
                 .description(contribution.getDescription())
                 .status(status)
                 .type(type)
+                .submittedAt(contribution.getSubmittedAt())
+                .approvedAt(contribution.getApprovedAt())
                 .build();
     }
 

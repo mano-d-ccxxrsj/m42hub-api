@@ -20,7 +20,7 @@ import java.util.UUID;
 public class Contribution {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "contribution_id")
     private UUID id;
 
