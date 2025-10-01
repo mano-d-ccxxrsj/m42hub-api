@@ -1,17 +1,23 @@
 package com.m42hub.m42hub_api.contribution.controller;
 
 import com.m42hub.m42hub_api.contribution.dto.request.ContributionRequest;
+import com.m42hub.m42hub_api.contribution.dto.response.ContributionListItemResponse;
 import com.m42hub.m42hub_api.contribution.dto.response.ContributionResponse;
 import com.m42hub.m42hub_api.contribution.entity.Contribution;
 import com.m42hub.m42hub_api.contribution.mapper.ContributionMapper;
 import com.m42hub.m42hub_api.contribution.service.ContributionService;
+import com.m42hub.m42hub_api.shared.dto.PageResponse;
+import com.m42hub.m42hub_api.shared.mapper.PageMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,6 +43,39 @@ public class ContributionController {
         return contributionService.findById(id)
                 .map(contribution -> ResponseEntity.ok(ContributionMapper.toContributionResponse(contribution)))
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<PageResponse<ContributionListItemResponse>> findByParams(
+            @RequestParam(defaultValue = "0", required = false) Integer page,
+            @RequestParam(defaultValue = "50", required = false) Integer limit,
+            @RequestParam(defaultValue = "approvedAt", required = false) String sortBy,
+            @RequestParam(defaultValue = "ASC", required = false) String sortDirection,
+            @RequestParam(required = false) List<Long> status,
+            @RequestParam(required = false) List<Long> type,
+            @RequestParam(required = false) List<Long> user,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date submittedAtStart,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date submittedAtEnd,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date approvedAtStart,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date approvedAtEnd
+    ) {
+        Page<Contribution> contributionPage = contributionService.findByParams(
+                page,
+                limit,
+                sortBy,
+                sortDirection,
+                status,
+                type,
+                user,
+                submittedAtStart,
+                submittedAtEnd,
+                approvedAtStart,
+                approvedAtEnd
+        );
+
+        PageResponse<ContributionListItemResponse> response = PageMapper.toPagedResponse(contributionPage, ContributionMapper::toContributionListItemResponse);
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping

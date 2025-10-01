@@ -1,6 +1,7 @@
 package com.m42hub.m42hub_api.contribution.mapper;
 
 import com.m42hub.m42hub_api.contribution.dto.request.ContributionRequest;
+import com.m42hub.m42hub_api.contribution.dto.response.ContributionListItemResponse;
 import com.m42hub.m42hub_api.contribution.dto.response.ContributionResponse;
 import com.m42hub.m42hub_api.contribution.dto.response.StatusResponse;
 import com.m42hub.m42hub_api.contribution.dto.response.TypeResponse;
@@ -49,6 +50,26 @@ public class ContributionMapper {
                 .type(type)
                 .submittedAt(contribution.getSubmittedAt())
                 .approvedAt(contribution.getApprovedAt())
+                .build();
+    }
+
+    public static ContributionListItemResponse toContributionListItemResponse(Contribution contribution) {
+
+        String statusName = contribution.getStatus() != null ? contribution.getStatus().getName() : null;
+        String typeName = contribution.getType() != null ? contribution.getType().getName() : null;
+        UserInfoResponse userInfoResponse = contribution.getUser() != null ? UserMapper.toUserInfoResponse(contribution.getUser()) : null;
+
+        return ContributionListItemResponse
+                .builder()
+                .id(contribution.getId())
+                .name(contribution.getName())
+                .description(contribution.getDescription())
+                .statusName(statusName)
+                .typeName(typeName)
+                .submittedAt(contribution.getSubmittedAt())
+                .approvedAt(contribution.getApprovedAt())
+                .creationDate(contribution.getCreatedAt())
+                .userInfo(userInfoResponse)
                 .build();
     }
 
