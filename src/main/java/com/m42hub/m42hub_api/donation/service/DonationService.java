@@ -5,12 +5,20 @@ import com.m42hub.m42hub_api.donation.entity.Platform;
 import com.m42hub.m42hub_api.donation.entity.Status;
 import com.m42hub.m42hub_api.donation.entity.Type;
 import com.m42hub.m42hub_api.donation.repository.DonationRepository;
+import com.m42hub.m42hub_api.donation.specification.DonationSpecification;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +42,57 @@ public class DonationService {
     @Transactional(readOnly = true)
     public Optional<Donation> findById(UUID id) {
         return repository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Donation> findByParams(
+            Integer page,
+            Integer limit,
+            String sortBy,
+            String sortDirection,
+            List<Long> status,
+            List<Long> type,
+            List<Long> platform,
+            List<Long> user,
+            Date donatedAtStart,
+            Date donatedAtEnd,
+            BigDecimal minTotalAmount,
+            BigDecimal maxTotalAmount
+    ) {
+        if (sortBy == null || sortBy.isEmpty()) {
+            sortBy = "amount";
+        }
+
+        Sort sort = Sort.by(Sort.Order.desc(sortBy));
+        if ("ASC".equalsIgnoreCase(sortDirection)) {
+            sort = Sort.by(Sort.Order.asc(sortBy));
+        }
+
+        Pageable pageable = PageRequest.of(page, limit, sort);
+
+        Specification<Donation> spec = Specification.allOf();
+
+        if (status != null) {
+            spec = spec.and(DonationSpecification.status(status));
+        }
+
+        if (type != null) {
+            spec = spec.and(DonationSpecification.type(type));
+        }
+
+        if (platform != null) {
+            spec = spec.and(DonationSpecification.platform(platform));
+        }
+
+        if (user != null) {
+            spec = spec.and(DonationSpecification.user(user));
+        }
+
+        spec = spec.and(DonationSpecification.donatedAtBetween(donatedAtStart, donatedAtEnd));
+
+        spec = spec.and(DonationSpecification.totalAmountBetween(minTotalAmount, maxTotalAmount));
+
+        return repository.findAll(spec, pageable);
     }
 
     @Transactional

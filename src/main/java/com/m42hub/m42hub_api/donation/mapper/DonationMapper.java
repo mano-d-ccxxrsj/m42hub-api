@@ -1,10 +1,7 @@
 package com.m42hub.m42hub_api.donation.mapper;
 
 import com.m42hub.m42hub_api.donation.dto.request.DonationRequest;
-import com.m42hub.m42hub_api.donation.dto.response.DonationResponse;
-import com.m42hub.m42hub_api.donation.dto.response.PlatformResponse;
-import com.m42hub.m42hub_api.donation.dto.response.StatusResponse;
-import com.m42hub.m42hub_api.donation.dto.response.TypeResponse;
+import com.m42hub.m42hub_api.donation.dto.response.*;
 import com.m42hub.m42hub_api.donation.entity.Donation;
 import com.m42hub.m42hub_api.donation.entity.Platform;
 import com.m42hub.m42hub_api.donation.entity.Status;
@@ -63,4 +60,25 @@ public class DonationMapper {
                 .build();
     }
 
+    public static DonationListItemResponse toDonationListItemResponse(Donation donation) {
+
+        String statusName = donation.getStatus() != null ? donation.getStatus().getName() : null;
+        String typeName = donation.getType() != null ? donation.getType().getName() : null;
+        String platformName = donation.getPlatform() != null ? donation.getPlatform().getName() : null;
+        UserInfoResponse userInfoResponse = donation.getUser() != null ? UserMapper.toUserInfoResponse(donation.getUser()) : null;
+
+        return DonationListItemResponse
+                .builder()
+                .id(donation.getId())
+                .name(donation.getName())
+                .summary(donation.getSummary())
+                .description(donation.getDescription())
+                .statusName(statusName)
+                .typeName(typeName)
+                .platformName(platformName)
+                .donatedAt(donation.getDonatedAt())
+                .creationDate(donation.getCreatedAt())
+                .userInfo(userInfoResponse)
+                .build();
+    }
 }
