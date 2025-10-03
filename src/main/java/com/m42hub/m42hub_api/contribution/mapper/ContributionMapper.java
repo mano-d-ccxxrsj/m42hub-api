@@ -1,10 +1,7 @@
 package com.m42hub.m42hub_api.contribution.mapper;
 
 import com.m42hub.m42hub_api.contribution.dto.request.ContributionRequest;
-import com.m42hub.m42hub_api.contribution.dto.response.ContributionListItemResponse;
-import com.m42hub.m42hub_api.contribution.dto.response.ContributionResponse;
-import com.m42hub.m42hub_api.contribution.dto.response.StatusResponse;
-import com.m42hub.m42hub_api.contribution.dto.response.TypeResponse;
+import com.m42hub.m42hub_api.contribution.dto.response.*;
 import com.m42hub.m42hub_api.contribution.entity.Contribution;
 import com.m42hub.m42hub_api.contribution.entity.Status;
 import com.m42hub.m42hub_api.contribution.entity.Type;
@@ -12,6 +9,12 @@ import com.m42hub.m42hub_api.user.dto.response.UserInfoResponse;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.mapper.UserMapper;
 import lombok.experimental.UtilityClass;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @UtilityClass
 public class ContributionMapper {
@@ -71,6 +74,20 @@ public class ContributionMapper {
                 .creationDate(contribution.getCreatedAt())
                 .userInfo(userInfoResponse)
                 .build();
+    }
+
+    public static List<ContributionsByUserResponse> toContributionsByUserResponse(List<Contribution> contributions) {
+        Map<User, List<Contribution>> grouped = contributions.stream()
+                .collect(Collectors.groupingBy(Contribution::getUser));
+
+        return grouped.entrySet().stream()
+                .map(entry -> ContributionsByUserResponse.builder()
+                        .userInfo(UserMapper.toUserInfoResponse(entry.getKey()))
+                        .contributions(entry.getValue().stream()
+                                .map(ContributionMapper::toContributionListItemResponse)
+                                .toList())
+                        .build())
+                .toList();
     }
 
 }

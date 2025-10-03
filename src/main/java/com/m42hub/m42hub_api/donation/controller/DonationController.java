@@ -8,6 +8,9 @@ import com.m42hub.m42hub_api.donation.mapper.DonationMapper;
 import com.m42hub.m42hub_api.donation.service.DonationService;
 import com.m42hub.m42hub_api.shared.dto.PageResponse;
 import com.m42hub.m42hub_api.shared.mapper.PageMapper;
+import com.m42hub.m42hub_api.user.dto.response.UserInfoResponse;
+import com.m42hub.m42hub_api.user.entity.User;
+import com.m42hub.m42hub_api.user.mapper.UserMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -47,6 +50,7 @@ public class DonationController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('donation:search')")
     public ResponseEntity<PageResponse<DonationListItemResponse>> findByParams(
             @RequestParam(defaultValue = "0", required = false) Integer page,
             @RequestParam(defaultValue = "50", required = false) Integer limit,
@@ -80,6 +84,40 @@ public class DonationController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/ranking")
+    public ResponseEntity<List<UserInfoResponse>> donationRanking(
+            @RequestParam(defaultValue = "50", required = false) Integer limit,
+            @RequestParam(defaultValue = "DESC", required = false) String sortDirection,
+            @RequestParam(required = false) List<Long> status,
+            @RequestParam(required = false) List<Long> type,
+            @RequestParam(required = false) List<Long> platform,
+            @RequestParam(required = false) List<Long> user,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date donatedAtStart,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date donatedAtEnd,
+            @RequestParam(required = false) BigDecimal minTotalAmount,
+            @RequestParam(required = false) BigDecimal maxTotalAmount
+    ) {
+        List<User> rankingList = donationService.donationRanking(
+                limit,
+                sortDirection,
+                status,
+                type,
+                platform,
+                user,
+                donatedAtStart,
+                donatedAtEnd,
+                minTotalAmount,
+                maxTotalAmount
+        );
+
+        List<UserInfoResponse> response = rankingList.stream()
+                .map(UserMapper::toUserInfoResponse)
+                .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('donation:create')")

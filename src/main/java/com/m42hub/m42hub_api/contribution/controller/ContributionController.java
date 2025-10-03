@@ -3,6 +3,7 @@ package com.m42hub.m42hub_api.contribution.controller;
 import com.m42hub.m42hub_api.contribution.dto.request.ContributionRequest;
 import com.m42hub.m42hub_api.contribution.dto.response.ContributionListItemResponse;
 import com.m42hub.m42hub_api.contribution.dto.response.ContributionResponse;
+import com.m42hub.m42hub_api.contribution.dto.response.ContributionsByUserResponse;
 import com.m42hub.m42hub_api.contribution.entity.Contribution;
 import com.m42hub.m42hub_api.contribution.mapper.ContributionMapper;
 import com.m42hub.m42hub_api.contribution.service.ContributionService;
@@ -17,9 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/contribution")
@@ -46,6 +45,7 @@ public class ContributionController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('contribution:search')")
     public ResponseEntity<PageResponse<ContributionListItemResponse>> findByParams(
             @RequestParam(defaultValue = "0", required = false) Integer page,
             @RequestParam(defaultValue = "50", required = false) Integer limit,
@@ -74,6 +74,43 @@ public class ContributionController {
         );
 
         PageResponse<ContributionListItemResponse> response = PageMapper.toPagedResponse(contributionPage, ContributionMapper::toContributionListItemResponse);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/users/search")
+    public ResponseEntity<List<ContributionsByUserResponse>> findByParamsGroupedByUser(
+            @RequestParam(defaultValue = "50", required = false) Integer limit,
+            @RequestParam(defaultValue = "DESC", required = false) String sortDirection,
+            @RequestParam(required = false) List<Long> status,
+            @RequestParam(required = false) List<Long> type,
+            @RequestParam(required = false) List<Long> user,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date submittedAtStart,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date submittedAtEnd,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date approvedAtStart,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date approvedAtEnd
+    ) {
+        Page<Contribution> contributions = contributionService.findByParams(
+                0,
+                limit,
+                "approvedAt",
+                sortDirection,
+                status,
+                type,
+                user,
+                submittedAtStart,
+                submittedAtEnd,
+                approvedAtStart,
+                approvedAtEnd
+        );
+
+        List<ContributionsByUserResponse> response = new ArrayList<>(ContributionMapper.toContributionsByUserResponse(contributions.getContent()));
+
+        Comparator<ContributionsByUserResponse> comparator = Comparator.comparingInt(item -> item.contributions().size());
+        if ("DESC".equalsIgnoreCase(sortDirection)) {
+            comparator = comparator.reversed();
+        }
+        response.sort(comparator);
 
         return ResponseEntity.ok(response);
     }

@@ -8,20 +8,17 @@ import com.m42hub.m42hub_api.donation.repository.DonationRepository;
 import com.m42hub.m42hub_api.donation.specification.DonationSpecification;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.service.UserService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +29,7 @@ public class DonationService {
     private final StatusService statusService;
     private final TypeService typeService;
     private final PlatformService platformService;
+    private final EntityManager entityManager;
 
 
     @Transactional(readOnly = true)
@@ -93,6 +91,74 @@ public class DonationService {
         spec = spec.and(DonationSpecification.totalAmountBetween(minTotalAmount, maxTotalAmount));
 
         return repository.findAll(spec, pageable);
+    }
+
+    //TODO: Refactor this to be more optimized, using this way just for test
+    @Transactional(readOnly = true)
+    public List<User> donationRanking(
+            Integer limit,
+            String sortDirection,
+            List<Long> status,
+            List<Long> type,
+            List<Long> platform,
+            List<Long> userIds,
+            Date donatedAtStart,
+            Date donatedAtEnd,
+            BigDecimal minTotalAmount,
+            BigDecimal maxTotalAmount
+    ) {
+
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+        CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
+        Root<Donation> donation = criteriaQuery.from(Donation.class);
+        Join<Donation, User> user = donation.join("user");
+
+        criteriaQuery.select(user);
+        criteriaQuery.groupBy(user.get("id"));
+        criteriaQuery.orderBy(
+                "ASC".equalsIgnoreCase(sortDirection)
+                        ? criteriaBuilder.asc(criteriaBuilder.sum(donation.get("amount")))
+                        : criteriaBuilder.desc(criteriaBuilder.sum(donation.get("amount")))
+        );
+
+        List<Predicate> predicates = new ArrayList<>();
+        if (status != null && !status.isEmpty()) {
+            predicates.add(donation.get("status").get("id").in(status));
+        }
+        if (type != null && !type.isEmpty()) {
+            predicates.add(donation.get("type").get("id").in(type));
+        }
+        if (platform != null && !platform.isEmpty()) {
+            predicates.add(donation.get("platform").get("id").in(platform));
+        }
+        if (userIds != null && !userIds.isEmpty()) {
+            predicates.add(user.get("id").in(userIds));
+        }
+        if (donatedAtStart != null) {
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(donation.get("donatedAt"), donatedAtStart));
+        }
+        if (donatedAtEnd != null) {
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(donation.get("donatedAt"), donatedAtEnd));
+        }
+        criteriaQuery.where(predicates.toArray(new Predicate[0]));
+
+        criteriaQuery.groupBy(user);
+
+        List<Predicate> havingPredicates = new ArrayList<>();
+        if (minTotalAmount != null) {
+            havingPredicates.add(criteriaBuilder.ge(criteriaBuilder.sum(donation.get("amount")), minTotalAmount));
+        }
+        if (maxTotalAmount != null) {
+            havingPredicates.add(criteriaBuilder.le(criteriaBuilder.sum(donation.get("amount")), maxTotalAmount));
+        }
+        if (!havingPredicates.isEmpty()) {
+            criteriaQuery.having(havingPredicates.toArray(new Predicate[0]));
+        }
+
+        TypedQuery<User> query = entityManager.createQuery(criteriaQuery);
+        query.setMaxResults(limit);
+        return query.getResultList();
     }
 
     @Transactional
