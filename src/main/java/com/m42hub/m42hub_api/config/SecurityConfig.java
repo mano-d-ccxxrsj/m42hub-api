@@ -50,7 +50,9 @@ public class SecurityConfig {
                                 "/api/v1/project/role/**",
                                 "/api/v1/project/status/**",
                                 "/api/v1/project/tool/**",
-                                "/api/v1/project/topic/**"
+                                "/api/v1/project/topic/**",
+                                "/api/v1/contribution/users/**",
+                                "/api/v1/donation/**"
                         ).permitAll()
 
                         .anyRequest().authenticated()
