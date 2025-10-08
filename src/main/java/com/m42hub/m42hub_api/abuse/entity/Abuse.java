@@ -2,10 +2,14 @@ package com.m42hub.m42hub_api.abuse.entity;
 
 import java.time.LocalDateTime;
 
+import com.m42hub.m42hub_api.abuse.enums.AbuseStatusEnum;
+import com.m42hub.m42hub_api.abuse.enums.TargetTypeAbuseEnum;
 import com.m42hub.m42hub_api.user.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -36,8 +40,9 @@ public class Abuse {
     @JoinColumn(name = "reporter_id", referencedColumnName = "user_id", nullable = false)
     private User reporter;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "target_type", length = 50, nullable = false)
-    private String targetType; // TODO trocar esse cara para um ENUM 
+    private TargetTypeAbuseEnum targetType; 
 
     @Column(name = "target_id", nullable = false)
     private Long targetId;
@@ -49,8 +54,9 @@ public class Abuse {
     @Column(name = "reason_text", columnDefinition = "TEXT", nullable = false)
     private String reasonText;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
-    private String status;
+    private AbuseStatusEnum status;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

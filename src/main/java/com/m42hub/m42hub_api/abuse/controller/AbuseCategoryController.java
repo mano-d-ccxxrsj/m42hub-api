@@ -14,7 +14,7 @@ import com.m42hub.m42hub_api.abuse.service.AbuseCategoryService;
 import lombok.AllArgsConstructor;
 
 @RestController
-@RequestMapping("/abuse/category")
+@RequestMapping("/api/v1/abuse/category")
 @AllArgsConstructor
 public class AbuseCategoryController {
 

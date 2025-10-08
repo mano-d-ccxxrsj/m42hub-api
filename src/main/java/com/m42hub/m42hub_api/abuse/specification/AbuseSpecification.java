@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.m42hub.m42hub_api.abuse.entity.Abuse;
+import com.m42hub.m42hub_api.abuse.enums.TargetTypeAbuseEnum;
 
 public class AbuseSpecification {
 
@@ -17,7 +18,7 @@ public class AbuseSpecification {
         };
     }
 
-    public static Specification<Abuse> targetType(List<String> targetTypes) {
+    public static Specification<Abuse> targetType(List<TargetTypeAbuseEnum> targetTypes) {
         return (root, query, criteriaBuilder) -> {
             if (targetTypes == null || targetTypes.isEmpty()) {
                 return criteriaBuilder.conjunction();

@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.m42hub.m42hub_api.abuse.dto.request.AbuseRequest;
 import com.m42hub.m42hub_api.abuse.dto.response.AbuseResponse;
+import com.m42hub.m42hub_api.abuse.enums.AbuseStatusEnum;
+import com.m42hub.m42hub_api.abuse.enums.TargetTypeAbuseEnum;
 import com.m42hub.m42hub_api.abuse.mapper.AbuseMapper;
 import com.m42hub.m42hub_api.abuse.service.AbuseService;
 import com.m42hub.m42hub_api.config.JWTUserData;
@@ -27,7 +29,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/abuse")
+@RequestMapping("/api/v1/abuse")
 @RequiredArgsConstructor
 public class AbuseController {
 
@@ -51,28 +53,32 @@ public class AbuseController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortDirection,
             @RequestParam(required = false) List<String> status,
-            @RequestParam(required = false) List<String> targetType,
+            @RequestParam(required = false) List<TargetTypeAbuseEnum> targetType,
             @RequestParam(required = false) List<Long> reasonCategory,
             @RequestParam(required = false) Long reporterId,
             @RequestParam(required = false) Long targetId) {
-        
+
         Page<AbuseResponse> abuses = abuseService.findByParams(
-                page, limit, sortBy, sortDirection, status, targetType, 
+                page, limit, sortBy, sortDirection, status, targetType,
                 reasonCategory, reporterId, targetId)
                 .map(AbuseMapper::toAbuseResponse);
-                
+
         return ResponseEntity.ok(abuses);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     public ResponseEntity<AbuseResponse> getAbuseById(@PathVariable Long id) {
-        return ResponseEntity.ok(AbuseMapper.toAbuseResponse(abuseService.findById(id)));
+        try {
+            return ResponseEntity.ok(AbuseMapper.toAbuseResponse(abuseService.findById(id)));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
-    public ResponseEntity<AbuseResponse> updateStatus(@PathVariable Long id, @RequestParam String status) {
+    public ResponseEntity<AbuseResponse> updateStatus(@PathVariable Long id, @RequestParam AbuseStatusEnum status) {
         return ResponseEntity.ok(AbuseMapper.toAbuseResponse(abuseService.updateStatus(id, status)));
     }
 }

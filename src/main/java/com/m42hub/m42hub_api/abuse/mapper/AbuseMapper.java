@@ -6,6 +6,7 @@ import com.m42hub.m42hub_api.abuse.dto.request.AbuseRequest;
 import com.m42hub.m42hub_api.abuse.dto.response.AbuseResponse;
 import com.m42hub.m42hub_api.abuse.entity.Abuse;
 import com.m42hub.m42hub_api.abuse.entity.AbuseCategory;
+import com.m42hub.m42hub_api.abuse.enums.AbuseStatusEnum;
 import com.m42hub.m42hub_api.user.entity.User;
 
 public class AbuseMapper {
@@ -17,7 +18,7 @@ public class AbuseMapper {
                 .targetId(request.targetId())
                 .reasonCategory(category)
                 .reasonText(request.reasonText())
-                .status("OPEN") // TODO fazer isso direito caso troque status
+                .status(AbuseStatusEnum.OPEN)
                 .createdAt(LocalDateTime.now())
                 .build();
     }
@@ -27,11 +28,11 @@ public class AbuseMapper {
                 abuse.getId(),
                 abuse.getReporter().getId(),
                 abuse.getReporter().getUsername(),
-                abuse.getTargetType(),
+                abuse.getTargetType().getDisplayName(),
                 abuse.getTargetId(),
                 abuse.getReasonCategory() != null ? abuse.getReasonCategory().getName() : null,
                 abuse.getReasonText(),
-                abuse.getStatus(),
+                abuse.getStatus().getDisplayName(),
                 abuse.getCreatedAt(),
                 abuse.getResolvedAt());
     }

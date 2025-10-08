@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.m42hub.m42hub_api.abuse.dto.request.AbuseRequest;
 import com.m42hub.m42hub_api.abuse.entity.Abuse;
 import com.m42hub.m42hub_api.abuse.entity.AbuseCategory;
+import com.m42hub.m42hub_api.abuse.enums.AbuseStatusEnum;
+import com.m42hub.m42hub_api.abuse.enums.TargetTypeAbuseEnum;
 import com.m42hub.m42hub_api.abuse.mapper.AbuseMapper;
 import com.m42hub.m42hub_api.abuse.repository.AbuseCategoryRepository;
 import com.m42hub.m42hub_api.abuse.repository.AbuseRepository;
@@ -55,11 +57,10 @@ public class AbuseService {
             String sortBy,
             String sortDirection,
             List<String> status,
-            List<String> targetType,
+            List<TargetTypeAbuseEnum> targetType,
             List<Long> reasonCategory,
             Long reporterId,
-            Long targetId
-    ) {
+            Long targetId) {
         if (sortBy == null || sortBy.isEmpty()) {
             sortBy = "id";
         }
@@ -102,11 +103,11 @@ public class AbuseService {
     }
 
     @Transactional
-    public Abuse updateStatus(Long id, String status) {
+    public Abuse updateStatus(Long id, AbuseStatusEnum status) {
         Abuse abuse = findById(id);
         abuse.setStatus(status);
 
-        if ("CLOSED".equals(status) || "RESOLVED".equals(status)) {
+        if (status.equals(AbuseStatusEnum.CLOSED) || status.equals(AbuseStatusEnum.RESOLVED)) {
             abuse.setResolvedAt(LocalDateTime.now());
         }
 
