@@ -1,6 +1,5 @@
 package com.m42hub.m42hub_api.project.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -8,7 +7,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
+import java.util.UUID;
 
 @Builder
 @NoArgsConstructor
@@ -18,11 +17,10 @@ import java.util.List;
 @Entity
 @Table(name = "projects")
 public class Project {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "project_id")
-    private Long id;
+    private UUID id;
 
     @Column(length = 50, nullable = false)
     private String name;
@@ -33,13 +31,11 @@ public class Project {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @ManyToOne()
-    @JoinColumn(name = "status_id", referencedColumnName = "project_status_id", nullable = false)
-    private Status status;
+    @Column(name = "status_id", nullable = false)
+    private Long statusId;
 
-    @ManyToOne()
-    @JoinColumn(name = "complexity_id", referencedColumnName = "project_complexity_id", nullable = false)
-    private Complexity complexity;
+    @Column(name = "complexity_id", nullable = false)
+    private Long complexityId;
 
     @Column(columnDefinition = "TEXT")
     private String imageUrl;
@@ -63,28 +59,4 @@ public class Project {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    @ManyToMany
-    @JoinTable(name = "projects_tools",
-            joinColumns = @JoinColumn(name = "project_id"),
-            inverseJoinColumns = @JoinColumn(name = "project_tools_id")
-    )
-    private List<Tool> tools;
-
-    @ManyToMany
-    @JoinTable(name = "projects_topics",
-            joinColumns = @JoinColumn(name = "project_id"),
-            inverseJoinColumns = @JoinColumn(name = "project_topics_id")
-    )
-    private List<Topic> topics;
-
-    @ManyToMany
-    @JoinTable(name = "project_unfilled_roles",
-            joinColumns = @JoinColumn(name = "project_id"),
-            inverseJoinColumns = @JoinColumn(name = "project_role_id")
-    )
-    private List<Role> unfilledRoles;
-
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Member> members;
 }

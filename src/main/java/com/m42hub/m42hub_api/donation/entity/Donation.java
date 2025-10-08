@@ -1,6 +1,5 @@
 package com.m42hub.m42hub_api.donation.entity;
 
-import com.m42hub.m42hub_api.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -19,7 +18,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "donations")
 public class Donation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "donation_id")
@@ -43,19 +41,16 @@ public class Donation {
     @Column(length = 3, nullable = false)
     private String currency = "BRL";
 
-    @ManyToOne()
-    @JoinColumn(name = "status_id", referencedColumnName = "donation_status_id", nullable = false)
-    private Status status;
+    @Column(name = "status_id", nullable = false)
+    private Long statusId;
 
-    @ManyToOne()
-    @JoinColumn(name = "type_id", referencedColumnName = "donation_type_id", nullable = false)
-    private Type type;
+    @Column(name = "type_id", nullable = false)
+    private Long typeId;
 
-    @ManyToOne()
-    @JoinColumn(name = "platform_id", referencedColumnName = "donation_platform_id", nullable = false)
-    private Platform platform;
+    @Column(name = "platform_id", nullable = false)
+    private Long platformId;
 
-    @Column(name="donated_at", nullable = false)
+    @Column(name = "donated_at", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date donatedAt;
 
@@ -65,7 +60,6 @@ public class Donation {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @ManyToOne()
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 }

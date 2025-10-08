@@ -21,7 +21,7 @@ public class RoleController {
 
     private final RoleService roleService;
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<RoleResponse>> getAll() {
         return ResponseEntity.ok(roleService.findAll()
                 .stream()
@@ -43,6 +43,4 @@ public class RoleController {
         Role savedRole = roleService.save(newRole);
         return ResponseEntity.status(HttpStatus.CREATED).body(RoleMapper.toRoleResponse(savedRole));
     }
-
-
 }

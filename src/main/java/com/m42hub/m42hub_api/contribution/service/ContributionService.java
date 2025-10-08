@@ -3,8 +3,8 @@ package com.m42hub.m42hub_api.contribution.service;
 import com.m42hub.m42hub_api.contribution.entity.Contribution;
 import com.m42hub.m42hub_api.contribution.entity.Status;
 import com.m42hub.m42hub_api.contribution.entity.Type;
+import com.m42hub.m42hub_api.contribution.enums.ContributionSortField;
 import com.m42hub.m42hub_api.contribution.repository.ContributionRepository;
-import com.m42hub.m42hub_api.contribution.repository.StatusRepository;
 import com.m42hub.m42hub_api.contribution.specification.ContributionSpecification;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.service.UserService;
@@ -43,9 +43,14 @@ public class ContributionService {
 
     @Transactional
     public Contribution save(Contribution contribution) {
-        contribution.setUser(findUser(contribution.getUser()));
-        contribution.setStatus(findStatus(contribution.getStatus()));
-        contribution.setType(findType(contribution.getType()));
+        User foundUser = userService.findById(contribution.getUserId()).orElse(null);
+        Status foundStatus = statusService.findById(contribution.getStatusId()).orElse(null);
+        Type foundType = typeService.findById(contribution.getTypeId()).orElse(null);
+
+        // Tem que tratar os null hein, ou retornar error no futuro, deixando a task ai
+        contribution.setUserId(foundUser.getId());
+        contribution.setStatusId(foundStatus.getId());
+        contribution.setTypeId(foundType.getId());
 
         return repository.save(contribution);
     }
@@ -56,20 +61,20 @@ public class ContributionService {
             Integer limit,
             String sortBy,
             String sortDirection,
-            List<Long> status,
-            List<Long> type,
-            List<Long> user,
+            List<UUID> status,
+            List<UUID> type,
+            List<UUID> user,
             Date submittedAtStart,
             Date submittedAtEnd,
             Date approvedAtStart,
             Date approvedAtEnd
     ) {
         if (sortBy == null || sortBy.isEmpty()) {
-            sortBy = "approvedAt";
+            sortBy = ContributionSortField.APPROVED_AT.getFieldName();
         }
 
         Sort sort = Sort.by(Sort.Order.asc(sortBy));
-        if ("DESC".equalsIgnoreCase(sortDirection)) {
+        if (ContributionSortField.DESC.getFieldName().equalsIgnoreCase(sortDirection)) {
             sort = Sort.by(Sort.Order.desc(sortBy));
         }
 
@@ -95,17 +100,4 @@ public class ContributionService {
 
         return repository.findAll(spec, pageable);
     }
-
-    private User findUser(User user) {
-        return userService.findById(user.getId()).orElse(null);
-    }
-
-    private Status findStatus(Status status) {
-        return statusService.findById(status.getId()).orElse(null);
-    }
-
-    private Type findType(Type type) {
-        return typeService.findById(type.getId()).orElse(null);
-    }
-
 }

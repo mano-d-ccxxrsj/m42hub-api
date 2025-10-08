@@ -4,12 +4,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
+import java.util.UUID;
 
 public record SystemRoleRequest(
         @NotBlank(message = "Nome do cargo é obrigatório")
         @Size(min = 3, message = "Nome do cargo deve ter no mínimo 3 caracteres")
         String name,
         String description,
-        List<Long> permissions
+        List<UUID> permissions
 ) {
 }

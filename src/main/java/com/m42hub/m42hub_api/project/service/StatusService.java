@@ -7,7 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -15,9 +18,9 @@ public class StatusService {
 
     private final StatusRepository repository;
 
-    @Transactional(readOnly = true)
-    public List<Status> findAll() {
-        return repository.findAllByOrderByNameAsc();
+    @Transactional
+    public Status save(Status status) {
+        return repository.save(status);
     }
 
     @Transactional(readOnly = true)
@@ -25,8 +28,19 @@ public class StatusService {
         return repository.findById(id);
     }
 
-    @Transactional
-    public Status save(Status status) {
-        return repository.save(status);
+    @Transactional(readOnly = true)
+    public List<Status> findAll() {
+        return repository.findAllByOrderByNameAsc();
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Status> findAllByIds(List<Long> ids) {
+        List<Status> statuses = repository.findAllById(ids);
+        return statuses.stream().collect(Collectors.toMap(Status::getId, Function.identity()));
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsById(Long statusId) {
+        return repository.existsById(statusId);
     }
 }

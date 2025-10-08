@@ -16,11 +16,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TopicServiceTest {
     private static final Logger logger = LoggerFactory.getLogger(TopicServiceTest.class);
+
+    private final int wantedNumberOfInvocations = 1;
 
     private static final Long PRIMARY_TOPIC_ID = 1L;
     private static final String PRIMARY_TOPIC_NAME = "PrimaryTopic";
@@ -68,10 +71,10 @@ public class TopicServiceTest {
     }
 
     @Test
-    public void shouldReturnAllTopics_whenFindAllIsCalled() {
+    public void shouldReturnAllOrderedTopics_whenFindAllIsCalled() {
         // GIVEN
         List<Topic> topics = List.of(topicPrimary, topicSecondary);
-        Mockito.when(topicRepository.findAll()).thenReturn(topics);
+        Mockito.when(topicRepository.findAllByOrderByNameAsc()).thenReturn(topics);
 
         // WHEN
         List<Topic> result = topicService.findAll();
@@ -80,7 +83,7 @@ public class TopicServiceTest {
         assertThat(result)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(topicPrimary, topicSecondary);
-        Mockito.verify(topicRepository, Mockito.times(1)).findAll();
+        Mockito.verify(topicRepository, Mockito.times(wantedNumberOfInvocations)).findAllByOrderByNameAsc();
     }
 
     @Test
@@ -96,13 +99,13 @@ public class TopicServiceTest {
         assertThat(result)
                 .isPresent()
                 .containsSame(topicPrimary);
-        Mockito.verify(topicRepository, Mockito.times(1)).findById(PRIMARY_TOPIC_ID);
+        Mockito.verify(topicRepository, Mockito.times(wantedNumberOfInvocations)).findById(PRIMARY_TOPIC_ID);
     }
 
     @Test
     public void shouldReturnEmpty_whenFindByInvalidId() {
         // GIVEN
-        Long invalidId = 999L;
+        Long invalidId = 4L;
         Mockito.when(topicRepository.findById(invalidId))
                 .thenReturn(Optional.empty());
 
@@ -111,7 +114,7 @@ public class TopicServiceTest {
 
         // THEN
         assertThat(result).isEmpty();
-        Mockito.verify(topicRepository, Mockito.times(1)).findById(invalidId);
+        Mockito.verify(topicRepository, Mockito.times(wantedNumberOfInvocations)).findById(invalidId);
     }
 
     @Test
@@ -128,7 +131,7 @@ public class TopicServiceTest {
                 .isNotNull()
                 .extracting(Topic::getId, Topic::getName)
                 .containsExactly(NEW_TOPIC_ID, NEW_TOPIC_NAME);
-        Mockito.verify(topicRepository, Mockito.times(1)).save(newTopic);
+        Mockito.verify(topicRepository, Mockito.times(wantedNumberOfInvocations)).save(newTopic);
     }
 
     @Test
@@ -147,14 +150,14 @@ public class TopicServiceTest {
         Topic actual = result.get();
         assertThat(actual).isSameAs(topicPrimary);
         assertThat(actual.getHexColor()).isEqualTo(UPDATED_COLOR);
-        Mockito.verify(topicRepository, Mockito.times(1)).findById(PRIMARY_TOPIC_ID);
-        Mockito.verify(topicRepository, Mockito.times(1)).save(topicPrimary);
+        Mockito.verify(topicRepository, Mockito.times(wantedNumberOfInvocations)).findById(PRIMARY_TOPIC_ID);
+        Mockito.verify(topicRepository, Mockito.times(wantedNumberOfInvocations)).save(topicPrimary);
     }
 
     @Test
     public void shouldNotChangeColor_whenTopicNotFound() {
         // GIVEN
-        Long invalidId = 999L;
+        Long invalidId = 4L;
         Mockito.when(topicRepository.findById(invalidId))
                 .thenReturn(Optional.empty());
 
@@ -163,7 +166,7 @@ public class TopicServiceTest {
 
         // THEN
         assertThat(result).isEmpty();
-        Mockito.verify(topicRepository, Mockito.times(1)).findById(invalidId);
+        Mockito.verify(topicRepository, Mockito.times(wantedNumberOfInvocations)).findById(invalidId);
         Mockito.verify(topicRepository, Mockito.never()).save(Mockito.any());
     }
 }

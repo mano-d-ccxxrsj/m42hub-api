@@ -1,10 +1,10 @@
 package com.m42hub.m42hub_api.user.dto.response;
 
-import com.m42hub.m42hub_api.project.dto.response.ProjectListItemResponse;
 import com.m42hub.m42hub_api.project.dto.response.RoleResponse;
 import lombok.Builder;
 
 import java.util.List;
+import java.util.UUID;
 
 @Builder
 public record UserInfoResponse(
@@ -13,7 +13,7 @@ public record UserInfoResponse(
         String lastName,
         String profilePicUrl,
         String profileBannerUrl,
-        Long roleId,
+        UUID roleId,
         String roleName,
         String biography,
         String discord,

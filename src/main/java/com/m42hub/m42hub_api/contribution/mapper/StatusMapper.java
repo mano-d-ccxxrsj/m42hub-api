@@ -9,8 +9,7 @@ import lombok.experimental.UtilityClass;
 public class StatusMapper {
 
     public static Status toStatus(StatusRequest request) {
-        return Status
-                .builder()
+        return Status.builder()
                 .name(request.name())
                 .label(request.label())
                 .description(request.description())
@@ -18,13 +17,11 @@ public class StatusMapper {
     }
 
     public static StatusResponse toStatusResponse(Status status) {
-        return StatusResponse
-                .builder()
+        return StatusResponse.builder()
                 .id(status.getId())
                 .name(status.getName())
                 .label(status.getLabel())
                 .description(status.getDescription())
                 .build();
     }
-
 }

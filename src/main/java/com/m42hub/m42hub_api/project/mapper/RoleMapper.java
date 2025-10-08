@@ -17,6 +17,7 @@ public class RoleMapper {
     }
 
     public static RoleResponse toRoleResponse(Role role) {
+        if (role == null) return null;
         return RoleResponse
                 .builder()
                 .id(role.getId())
@@ -24,5 +25,4 @@ public class RoleMapper {
                 .description(role.getDescription())
                 .build();
     }
-
 }

@@ -17,5 +17,4 @@ public class UserSpecification {
             return join.get("id").in(interestRolesIds);
         };
     }
-
 }

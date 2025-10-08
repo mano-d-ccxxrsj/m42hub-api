@@ -1,14 +1,13 @@
 package com.m42hub.m42hub_api.user.dto.response;
 
-import com.m42hub.m42hub_api.user.entity.SystemRole;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Builder
 public record UserResponse(
-        Long id,
+        UUID id,
         String username,
         String email,
         String firstName,

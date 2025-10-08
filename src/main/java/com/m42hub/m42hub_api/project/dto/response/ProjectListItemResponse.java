@@ -6,10 +6,11 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Builder
 public record ProjectListItemResponse(
-        Long id,
+        UUID id,
         String name,
         String summary,
         String statusName,

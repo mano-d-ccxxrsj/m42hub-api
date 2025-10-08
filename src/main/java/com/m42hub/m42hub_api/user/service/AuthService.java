@@ -2,6 +2,10 @@ package com.m42hub.m42hub_api.user.service;
 
 import com.m42hub.m42hub_api.config.JWTUserData;
 import com.m42hub.m42hub_api.exceptions.UnauthorizedException;
+import com.m42hub.m42hub_api.user.entity.Permission;
+import com.m42hub.m42hub_api.user.entity.SystemRole;
+import com.m42hub.m42hub_api.user.entity.User;
+import com.m42hub.m42hub_api.user.entity.UserDetailsImpl;
 import com.m42hub.m42hub_api.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -12,6 +16,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -19,11 +24,21 @@ import java.util.Objects;
 public class AuthService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final SystemRoleService systemRoleService;
+    private final PermissionService permissionService;
 
-    @Transactional
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Usuário ou senha inválido, tente novamente!"));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
+
+        SystemRole systemRole = systemRoleService.findById(user.getSystemRoleId())
+                .orElseThrow(() -> new RuntimeException("SystemRole não encontrado"));
+
+        List<Permission> permissions = permissionService.findBySystemRoleId(systemRole.getId());
+
+        return new UserDetailsImpl(user, systemRole, permissions);
     }
 
     public JWTUserData validateUserAccess(String username) {
@@ -36,5 +51,4 @@ public class AuthService implements UserDetailsService {
 
         return userData;
     }
-
 }

@@ -9,23 +9,21 @@ import lombok.experimental.UtilityClass;
 public class TypeMapper {
 
     public static Type toType(TypeRequest request) {
-        return Type
-                .builder()
+        return Type.builder()
                 .name(request.name())
                 .label(request.label())
-                .hexColor(request.hexColor())
                 .description(request.description())
+                .hexColor(request.hexColor())
                 .build();
     }
 
     public static TypeResponse toTypeResponse(Type type) {
-        return TypeResponse
-                .builder()
+        return TypeResponse.builder()
                 .id(type.getId())
                 .name(type.getName())
                 .label(type.getLabel())
+                .hexColor(type.getHexColor())
                 .description(type.getDescription())
                 .build();
     }
-
 }

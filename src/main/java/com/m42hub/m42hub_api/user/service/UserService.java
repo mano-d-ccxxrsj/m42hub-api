@@ -1,12 +1,10 @@
 package com.m42hub.m42hub_api.user.service;
 
+import com.m42hub.m42hub_api.exceptions.CustomNotFoundException;
 import com.m42hub.m42hub_api.file.service.ImgBBService;
-import com.m42hub.m42hub_api.project.entity.Role;
-import com.m42hub.m42hub_api.project.service.RoleService;
-import com.m42hub.m42hub_api.user.dto.request.UserInfoRequest;
-import com.m42hub.m42hub_api.user.dto.request.UserPasswordChangeRequest;
 import com.m42hub.m42hub_api.user.entity.SystemRole;
 import com.m42hub.m42hub_api.user.entity.User;
+import com.m42hub.m42hub_api.user.repository.SystemRoleRepository;
 import com.m42hub.m42hub_api.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,133 +14,126 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final UserRepository repository;
-    private final PasswordEncoder passwordEncoder;
-    private final SystemRoleService systemRoleService;
-    private final RoleService projectRoleService;
-    private final ImgBBService imgBBService;
+
+    private final UserInterestProjectRoleService userInterestProjectRoleService;
     private final AuthenticationManager authenticationManager;
+    private final SystemRoleRepository systemRoleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final ImgBBService imgBBService;
+
+    // save() e saveWithRole()
+    // REF: https://github.com/m42hub/m42hub-api/blob/main/src/main/java/com/m42hub/m42hub_api/user/service/UserService.java#L49
+    @Transactional
+    public User save(User user) {
+        user.setUsername(user.getUsername().toLowerCase());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public UserSaveResult saveWithRole(User user) {
+        user.setUsername(user.getUsername().toLowerCase());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User savedUser = userRepository.save(user);
+        SystemRole systemRole = systemRoleRepository.findById(savedUser.getSystemRoleId())
+                .orElseThrow(() -> new CustomNotFoundException("SystemRole não encontrado"));
+
+        return new UserSaveResult(savedUser, systemRole);
+    }
+
+    // Gambiarra para amarrar em uma unica transação
+    public record UserSaveResult(User user, SystemRole systemRole) {
+    }
+
 
     @Transactional(readOnly = true)
-    public List<User> findAll() {
-        return repository.findAll();
+    public Map<UUID, User> findAllByIds(List<UUID> ids) {
+        List<User> users = userRepository.findAllById(ids);
+        return users.stream().collect(Collectors.toMap(User::getId, Function.identity()));
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> findById(Long id) {
-        return repository.findById(id);
+    public Optional<User> findById(UUID id) {
+        return userRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 
     @Transactional(readOnly = true)
     public Optional<User> findByUsername(String username) {
-        return repository.findUserByUsername(username);
+        return userRepository.findByUsername(username);
     }
 
     @Transactional
-    public User save(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setSystemRole(findSystemRole(user.getSystemRole()));
-        return repository.save(user);
-    }
+    public Optional<User> update(User userInfo, UUID userId, List<Long> roleIdsToUpdate) {
+        return userRepository.findById(userId).map(user -> {
+            Optional.ofNullable(userInfo.getFirstName()).ifPresent(user::setFirstName);
+            Optional.ofNullable(userInfo.getLastName()).ifPresent(user::setLastName);
+            Optional.ofNullable(userInfo.getBiography()).ifPresent(user::setBiography);
+            Optional.ofNullable(userInfo.getDiscord()).ifPresent(user::setDiscord);
+            Optional.ofNullable(userInfo.getLinkedin()).ifPresent(user::setLinkedin);
+            Optional.ofNullable(userInfo.getGithub()).ifPresent(user::setGithub);
+            Optional.ofNullable(userInfo.getPersonalWebsite()).ifPresent(user::setPersonalWebsite);
 
-    @Transactional
-    public Optional<User> editInfo(UserInfoRequest updatedUserInfo, Long userId) {
-        Optional<User> optUser = repository.findById(userId);
-        if (optUser.isPresent()) {
-            User user = optUser.get();
-
-            if (updatedUserInfo.firstName() != null) user.setFirstName(updatedUserInfo.firstName());
-            if (updatedUserInfo.lastName() != null) user.setLastName(updatedUserInfo.lastName());
-            if (updatedUserInfo.biography() != null) user.setBiography(updatedUserInfo.biography());
-            if (updatedUserInfo.discord() != null) user.setDiscord(updatedUserInfo.discord());
-            if (updatedUserInfo.linkedin() != null) user.setLinkedin(updatedUserInfo.linkedin());
-            if (updatedUserInfo.github() != null) user.setGithub(updatedUserInfo.github());
-            if (updatedUserInfo.personalWebsite() != null) user.setPersonalWebsite(updatedUserInfo.personalWebsite());
-
-            if (updatedUserInfo.interestRoles() != null) {
-                user.setInterestRoles(findProjectRoles(updatedUserInfo.interestRoles()));
+            if (roleIdsToUpdate != null) {
+                userInterestProjectRoleService.addRelations(userId, roleIdsToUpdate);
             }
 
-            repository.save(user);
-            return Optional.of(user);
-        }
-        return Optional.empty();
+            return userRepository.save(user);
+        });
     }
 
-    public Optional<User> changeProfilePic(MultipartFile file, Long userId) {
-        Optional<User> optUser = repository.findById(userId);
-        if (optUser.isPresent()) {
-            User user = optUser.get();
-
+    @Transactional
+    public Optional<User> changeProfilePic(MultipartFile file, UUID userId) {
+        return userRepository.findById(userId).map(user -> {
             String imageUrl = imgBBService.uploadImage(file);
+
             user.setProfilePicUrl(imageUrl);
-
-            repository.save(user);
-            return Optional.of(user);
-        }
-        return Optional.empty();
+            return userRepository.save(user);
+        });
     }
 
-    public Optional<User> changeProfileBanner(MultipartFile file, Long userId) {
-        Optional<User> optUser = repository.findById(userId);
-        if (optUser.isPresent()) {
-            User user = optUser.get();
-
+    @Transactional
+    public Optional<User> changeProfileBanner(MultipartFile file, UUID userId) {
+        return userRepository.findById(userId).map(user -> {
             String imageUrl = imgBBService.uploadImage(file);
-            user.setProfileBannerUrl(imageUrl);
 
-            repository.save(user);
-            return Optional.of(user);
-        }
-        return Optional.empty();
+            user.setProfileBannerUrl(imageUrl);
+            return userRepository.save(user);
+        });
     }
 
-    public Optional<User> changePassword(UserPasswordChangeRequest request, Long userId) {
-        Optional<User> optUser = repository.findById(userId);
-        if (optUser.isPresent()) {
-            User user = optUser.get();
-
-            UsernamePasswordAuthenticationToken usernameAndPassword = new UsernamePasswordAuthenticationToken(user.getUsername().toLowerCase(), request.oldPassword());
+    @Transactional
+    public Optional<User> changePassword(String oldPassword, String newPassword, UUID userId) {
+        return userRepository.findById(userId).map(user -> {
+            UsernamePasswordAuthenticationToken usernameAndPassword = new UsernamePasswordAuthenticationToken(user.getUsername().toLowerCase(), oldPassword);
             authenticationManager.authenticate(usernameAndPassword);
 
-            user.setPassword(passwordEncoder.encode(request.newPassword()));
-
-            repository.save(user);
-            return Optional.of(user);
-        }
-        return Optional.empty();
-    }
-
-    public Optional<User> changeStatus(Long userId, Boolean active) {
-        Optional<User> optUser = repository.findById(userId);
-        if (optUser.isPresent()) {
-            User user = optUser.get();
-
-            user.setIsActive(active);
-
-            repository.save(user);
-            return Optional.of(user);
-        }
-        return Optional.empty();
+            user.setPassword(passwordEncoder.encode(newPassword));
+            return userRepository.save(user);
+        });
     }
 
     @Transactional
-    private SystemRole findSystemRole(SystemRole systemRole) {
-        return systemRoleService.findById(systemRole.getId()).orElse(null);
+    public Optional<User> changeStatus(UUID id, boolean isActive) {
+        return userRepository.findById(id).map(user -> {
+            user.setIsActive(isActive);
+            userRepository.save(user);
+            return user;
+        });
     }
-
-    @Transactional
-    private List<Role> findProjectRoles(List<Long> projectRoles) {
-        List<Role> projectRolesFound = new ArrayList<>();
-        projectRoles.forEach(roleId -> projectRoleService.findById(roleId).ifPresent(projectRolesFound::add));
-        return projectRolesFound;
-    }
-
 }

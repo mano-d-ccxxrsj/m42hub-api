@@ -45,6 +45,4 @@ public class StatusController {
         Status savedStatus = statusService.save(newStatus);
         return ResponseEntity.status(HttpStatus.CREATED).body(StatusMapper.toStatusResponse(savedStatus));
     }
-
-
 }

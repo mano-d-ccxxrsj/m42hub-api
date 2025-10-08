@@ -4,6 +4,7 @@ import com.m42hub.m42hub_api.project.entity.Role;
 import com.m42hub.m42hub_api.project.repository.RoleRepository;
 import com.m42hub.m42hub_api.project.service.RoleService;
 import com.m42hub.m42hub_api.services.util.TestUtils;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,11 +17,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.UUID;
 
 public class RoleServiceTest {
     private static final Logger logger = LoggerFactory.getLogger(RoleServiceTest.class);
+
+    private final int wantedNumberOfInvocations = 1;
 
     private static final Long PRIMARY_ROLE_ID = 1L;
     private static final String PRIMARY_ROLE_NAME = "ADMIN";
@@ -66,16 +68,16 @@ public class RoleServiceTest {
     public void shouldReturnAllRoles_whenFindAllIsCalled() {
         // GIVEN
         List<Role> roles = List.of(rolePrimary, roleSecondary);
-        Mockito.when(roleRepository.findAll()).thenReturn(roles);
+        Mockito.when(roleRepository.findAllByOrderByNameAsc()).thenReturn(roles);
 
         // WHEN
         List<Role> result = roleService.findAll();
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(rolePrimary, roleSecondary);
-        Mockito.verify(roleRepository, Mockito.times(1)).findAll();
+        Mockito.verify(roleRepository, Mockito.times(wantedNumberOfInvocations)).findAllByOrderByNameAsc();
     }
 
     @Test
@@ -88,16 +90,16 @@ public class RoleServiceTest {
         Optional<Role> result = roleService.findById(PRIMARY_ROLE_ID);
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .isPresent()
                 .containsSame(rolePrimary);
-        Mockito.verify(roleRepository, Mockito.times(1)).findById(PRIMARY_ROLE_ID);
+        Mockito.verify(roleRepository, Mockito.times(wantedNumberOfInvocations)).findById(PRIMARY_ROLE_ID);
     }
 
     @Test
     public void shouldReturnEmpty_whenFindByInvalidId() {
         // GIVEN
-        Long invalidId = 999L;
+        Long invalidId = 4L;
         Mockito.when(roleRepository.findById(invalidId))
                 .thenReturn(Optional.empty());
 
@@ -105,8 +107,8 @@ public class RoleServiceTest {
         Optional<Role> result = roleService.findById(invalidId);
 
         // THEN
-        assertThat(result).isEmpty();
-        Mockito.verify(roleRepository, Mockito.times(1)).findById(invalidId);
+        Assertions.assertThat(result).isEmpty();
+        Mockito.verify(roleRepository, Mockito.times(wantedNumberOfInvocations)).findById(invalidId);
     }
 
     @Test
@@ -119,10 +121,10 @@ public class RoleServiceTest {
         Role result = roleService.save(newRole);
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .isNotNull()
                 .extracting(Role::getId, Role::getName)
                 .containsExactly(NEW_ROLE_ID, NEW_ROLE_NAME);
-        Mockito.verify(roleRepository, Mockito.times(1)).save(newRole);
+        Mockito.verify(roleRepository, Mockito.times(wantedNumberOfInvocations)).save(newRole);
     }
 }

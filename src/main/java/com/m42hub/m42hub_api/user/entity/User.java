@@ -1,19 +1,12 @@
 package com.m42hub.m42hub_api.user.entity;
 
-import com.m42hub.m42hub_api.project.entity.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Builder
 @NoArgsConstructor
@@ -22,12 +15,11 @@ import java.util.stream.Collectors;
 @Setter
 @Entity
 @Table(name = "users")
-public class User implements UserDetails {
-
+public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "user_id")
-    private Long id;
+    private UUID id;
 
     @Column(length = 50, nullable = false)
     private String username;
@@ -71,62 +63,6 @@ public class User implements UserDetails {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @ManyToMany
-    @JoinTable(name = "user_interest_project_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "project_role_id")
-    )
-    private List<Role> interestRoles;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "system_role_id", referencedColumnName = "system_role_id", nullable = false)
-    private SystemRole systemRole;
-
-    @Override
-    @Transactional
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (systemRole.getPermissions() == null || systemRole.getPermissions().isEmpty()) {
-            if (systemRole.getName() == null || systemRole.getName().isEmpty()) {
-                return List.of(new SimpleGrantedAuthority("ROLE_USER"));
-            }
-            return List.of(new SimpleGrantedAuthority("ROLE_" + systemRole.getName()));
-        }
-
-        List<GrantedAuthority> authorities = systemRole.getPermissions().stream()
-                .map(permission -> new SimpleGrantedAuthority(permission.getName()))
-                .collect(Collectors.toList());
-
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + systemRole.getName()));
-
-        return authorities;
-    }
-
-    @Override
-    public String getUsername() {
-        return username.toLowerCase();
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return isActive;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return isActive;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return isActive;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return isActive;
-    }
-
-    public void setUsername(String username) {
-        this.username = username.toLowerCase();
-    }
+    @Column(name = "system_role_id", nullable = false)
+    private UUID systemRoleId;
 }

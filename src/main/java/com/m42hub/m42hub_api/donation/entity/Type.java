@@ -2,17 +2,15 @@ package com.m42hub.m42hub_api.donation.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.web.bind.annotation.RestController;
 
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@Entity(name = "donationType")
+@Builder
+@Entity(name = "DonationType")
 @Table(name = "donation_types")
 public class Type {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "donation_type_id")
@@ -24,9 +22,9 @@ public class Type {
     @Column(length = 100, nullable = false, unique = true)
     private String label;
 
-    @Column(name = "hex_color", length = 9)
-    private String hexColor;
-
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "hex_color", length = 9)
+    private String hexColor;
 }

@@ -5,36 +5,76 @@ import com.m42hub.m42hub_api.user.entity.Permission;
 import com.m42hub.m42hub_api.user.entity.SystemRole;
 import com.m42hub.m42hub_api.user.entity.User;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
+import java.util.UUID;
 
 public class TestUtils {
 
-    public static SystemRole createRole(Long id, String name) {
+    public static UUID getRandomUUID() {
+        return UUID.randomUUID();
+    }
+
+    public static SystemRole createRole(UUID id, String name) {
         return SystemRole.builder()
                 .id(id)
                 .name(name)
                 .build();
     }
 
-    public static User createUser(Long id, String username, String firstName, String lastName, String email, SystemRole role) {
+    public static User createUser(
+            UUID id,
+            String username,
+            String firstName,
+            String lastName,
+            String email,
+            String password,
+            String profilePicUrl,
+            String profileBannerUrl,
+            String biography,
+            String discord,
+            String linkedin,
+            String github,
+            String personalWebsite,
+            Boolean isActive,
+            LocalDateTime lastLogin,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
         return User.builder()
                 .id(id)
                 .username(username)
                 .firstName(firstName)
                 .lastName(lastName)
                 .email(email)
-                .isActive(true)
-                .systemRole(role)
+                .password(password)
+                .profilePicUrl(profilePicUrl)
+                .profileBannerUrl(profileBannerUrl)
+                .biography(biography)
+                .discord(discord)
+                .linkedin(linkedin)
+                .github(github)
+                .personalWebsite(personalWebsite)
+                .isActive(isActive)
+                .lastLogin(lastLogin)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
                 .build();
     }
 
-    public static Permission createPermission(Long id, String name, String description) {
+    public static Permission createPermission(UUID id, String name, String description) {
         return Permission.builder()
                 .id(id)
                 .name(name)
                 .description(description)
+                .build();
+    }
+
+    public static ProjectTopic createProjectTopic(Long id, UUID projectId, Long topicId) {
+        return ProjectTopic.builder()
+                .id(id)
+                .projectId(projectId)
+                .topicId(topicId)
                 .build();
     }
 
@@ -44,6 +84,14 @@ public class TestUtils {
                 .name(name)
                 .hexColor(hexColor)
                 .description(description)
+                .build();
+    }
+
+    public static ProjectTool createProjectTool(Long id, UUID projectId, Long toolId) {
+        return ProjectTool.builder()
+                .id(id)
+                .projectId(projectId)
+                .toolId(toolId)
                 .build();
     }
 
@@ -83,54 +131,48 @@ public class TestUtils {
     public static Member createMember(
             Long id,
             Boolean isManager,
-            Project project,
-            Role role,
-            User user,
-            MemberStatus memberStatus,
             String applicationMessage,
             String applicationFeedback
     ) {
         return Member.builder()
                 .id(id)
                 .isManager(isManager)
-                .project(project)
-                .role(role)
-                .user(user)
-                .memberStatus(memberStatus)
                 .applicationMessage(applicationMessage)
                 .applicationFeedback(applicationFeedback)
                 .build();
     }
 
     public static Project createProject(
-            Long id,
+            UUID id,
             String name,
             String summary,
             String description,
-            Status status,
-            Complexity complexity,
+            Long statusId,
+            Long complexityId,
             String imageUrl,
             Date startDate,
             Date endDate,
-            List<Tool> tools,
-            List<Topic> topics,
-            List<Role> unfilledRoles,
-            List<Member> members
+            String discord,
+            String github,
+            String projectWebsite,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
     ) {
         return Project.builder()
                 .id(id)
                 .name(name)
                 .summary(summary)
                 .description(description)
-                .status(status)
-                .complexity(complexity)
+                .statusId(statusId)
+                .complexityId(complexityId)
                 .imageUrl(imageUrl)
                 .startDate(startDate)
                 .endDate(endDate)
-                .tools(tools != null ? tools : new ArrayList<>())
-                .topics(topics != null ? topics : new ArrayList<>())
-                .unfilledRoles(unfilledRoles != null ? unfilledRoles : new ArrayList<>())
-                .members(members != null ? members : new ArrayList<>())
+                .discord(discord)
+                .github(github)
+                .projectWebsite(projectWebsite)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
                 .build();
     }
 

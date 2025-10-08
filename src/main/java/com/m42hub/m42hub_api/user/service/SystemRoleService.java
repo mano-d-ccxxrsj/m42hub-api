@@ -1,25 +1,33 @@
 package com.m42hub.m42hub_api.user.service;
 
-import com.m42hub.m42hub_api.project.entity.Project;
-import com.m42hub.m42hub_api.project.entity.Role;
-import com.m42hub.m42hub_api.user.entity.Permission;
 import com.m42hub.m42hub_api.user.entity.SystemRole;
 import com.m42hub.m42hub_api.user.repository.SystemRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class SystemRoleService {
 
     private final SystemRoleRepository repository;
-    private final PermissionService permissionService;
+
+    @Transactional
+    public SystemRole save(SystemRole systemRole) {
+        return repository.save(systemRole);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<SystemRole> findById(UUID id) {
+        return repository.findById(id);
+    }
 
     @Transactional(readOnly = true)
     public List<SystemRole> findAll() {
@@ -27,42 +35,8 @@ public class SystemRoleService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<SystemRole> findById(Long id) {
-        return repository.findById(id);
+    public Map<UUID, SystemRole> findAllByIds(List<UUID> ids) {
+        List<SystemRole> systemRoles = repository.findAllById(ids);
+        return systemRoles.stream().collect(Collectors.toMap(SystemRole::getId, Function.identity()));
     }
-
-    @Transactional
-    public SystemRole save(SystemRole systemRole) {
-        systemRole.setPermissions(this.findPermissions(systemRole.getPermissions()));
-        return repository.save(systemRole);
-    }
-
-    @Transactional
-    public Optional<SystemRole> changePermissions(Long systemRoleId, List<Long> permissionIds) {
-        Optional<SystemRole> optSystemRole= repository.findById(systemRoleId);
-
-        if(optSystemRole.isPresent()) {
-            List<Permission> permissions = permissionIds.stream()
-                    .map(unfilledRoleId -> Permission.builder().id(unfilledRoleId).build())
-                    .toList();
-
-            List<Permission> permissionsFound = findPermissions(permissions);
-            SystemRole systemRole = optSystemRole.get();
-
-            systemRole.setPermissions(permissionsFound);
-
-            repository.save(systemRole);
-            return Optional.of(systemRole);
-        }
-
-        return Optional.empty();
-    }
-
-    @Transactional
-    private List<Permission> findPermissions(List<Permission> permissions) {
-        List<Permission> permissionsFound = new ArrayList<>();
-        permissions.forEach(permission -> permissionService.findById(permission.getId()).ifPresent(permissionsFound::add));
-        return permissionsFound;
-    }
-
 }

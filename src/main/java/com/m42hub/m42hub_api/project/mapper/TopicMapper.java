@@ -26,5 +26,4 @@ public class TopicMapper {
                 .hexColor(topic.getHexColor())
                 .build();
     }
-
 }

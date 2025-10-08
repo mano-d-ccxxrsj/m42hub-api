@@ -7,27 +7,29 @@ import com.m42hub.m42hub_api.project.entity.Member;
 import com.m42hub.m42hub_api.project.entity.MemberStatus;
 import com.m42hub.m42hub_api.project.entity.Project;
 import com.m42hub.m42hub_api.project.repository.MemberRepository;
+import com.m42hub.m42hub_api.project.repository.ProjectRepository;
 import com.m42hub.m42hub_api.user.entity.User;
 import com.m42hub.m42hub_api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MemberService {
 
-    private final MemberRepository repository;
+    private final ProjectUnfilledRoleService projectUnfilledRoleService;
     private final MemberStatusService memberStatusService;
+    private final ProjectRepository projectRepository;
+    private final MemberRepository repository;
     private final UserService userService;
-    private final ProjectService projectService;
 
-    @Transactional(readOnly = true)
-    public List<Member> findAll() {
-        return repository.findAll();
+    @Transactional
+    public Member save(Member member) {
+        return repository.save(member);
     }
 
     @Transactional(readOnly = true)
@@ -36,90 +38,104 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
+    public List<Member> findAll() {
+        return repository.findAll();
+    }
+
+    @Transactional(readOnly = true)
     public List<Member> findByUsername(String username) {
-        Optional<User> optUser = userService.findByUsername(username);
-        if (optUser.isEmpty()) {
-            throw new CustomNotFoundException("Usuário não encontrado");
-        }
-
-        User user = optUser.get();
-
+        User user = userService.findByUsername(username).orElseThrow(() ->
+                new CustomNotFoundException("Usuário não encontrado")
+        );
         return repository.findAllByUserId(user.getId());
     }
 
-    @Transactional
-    public Member save(Member member) {
+    public List<Member> findByProjectId(UUID projectId) {
+        return repository.findAllByProjectId(projectId);
+    }
 
-        member.setMemberStatus(findMemberStatus(member.getMemberStatus()));
-        member.setUser(findUser(member.getUser()));
-
-        return repository.save(member);
+    @Transactional(readOnly = true)
+    public Map<UUID, List<Member>> findByProjectIds(List<UUID> projectIds) {
+        List<Member> members = repository.findByProjectIdIn(projectIds);
+        return members.stream().collect(Collectors.groupingBy(Member::getProjectId));
     }
 
     @Transactional
-    public Optional<Member> approve(Long memberId, Long userId) {
-        Optional<Member> optMember = repository.findById(memberId);
-        if (optMember.isEmpty()) throw new CustomNotFoundException("Membro não encontrado");
+    public Optional<Member> approve(Long memberId, UUID userId) {
+        Member member = repository.findById(memberId).orElseThrow(() ->
+                new CustomNotFoundException("Membro não encontrado")
+        );
 
-        Member member = optMember.get();
+        Project project = projectRepository.findById(member.getProjectId()).map(foundProject -> {
+            if (!isUserProjectManager(foundProject.getId(), userId)) {
+                throw new UnauthorizedException("Usuário que solicitou alteração não é o idealizador do projeto");
+            }
+            if (isRoleFilled(foundProject, member.getRoleId())) {
+                throw new ConflictException("Cargo já preenchido");
+            }
+            return foundProject;
+        }).orElseThrow(() ->
+                new CustomNotFoundException("Projeto não encontrado")
+        );
 
-        Optional<Project> optProject = projectService.findById(member.getProject().getId());
-        if (optProject.isEmpty()) throw new CustomNotFoundException("Projeto não encontrado");
+        projectUnfilledRoleService.removeRelation(project.getId(), member.getRoleId());
 
-        Project project = optProject.get();
+        // Não é boa ideia usar hardcode, MAS… Deixei como Nome invés de LONG(id), ou agora, UUID(id), por clareza.
+        // 2L antes, sem ler o flyway, não fazia muito sentido apenas lendo o código. (REF: V3__insert_project_tables.sql)
+        MemberStatus approvedStatus = memberStatusService.findByName("Aprovado")
+                .orElseThrow(() -> new CustomNotFoundException("Status Aprovado não encontrado"));
 
-        if (projectService.isNotManager(project, userId))
-            throw new UnauthorizedException("Usuário que solicitou alteração não é o idealizador do projeto");
-
-        if (projectService.isRoleFilled(project, member.getRole())) throw new ConflictException("Cargo já preenchido");
-
-        project.getUnfilledRoles().remove(member.getRole());
-
-        projectService.update(project.getId(), project, userId);
-
-        MemberStatus approvedStatus = MemberStatus.builder().id(2L).build();
-        member.setMemberStatus(approvedStatus);
-
+        member.setStatusId(approvedStatus.getId());
         repository.save(member);
 
         return Optional.of(member);
     }
 
+    // Não é boa ideia usar hardcode, MAS… Deixei como Nome invés de LONG(id), ou agora, UUID(id), por clareza.
+    // 1L antes, sem ler o flyway, não fazia muito sentido apenas lendo o código. (REF: V3__insert_project_tables.sql)
     @Transactional
-    public Optional<Member> reject(Long memberId, String applicationFeedback, Long userId) {
-        Optional<Member> optMember = repository.findById(memberId);
-        if (optMember.isEmpty()) throw new CustomNotFoundException("Membro não encontrado");
+    public Optional<Member> reject(Long memberId, String applicationFeedback, UUID userId) {
+        Member member = repository.findById(memberId).orElseThrow(() ->
+                new CustomNotFoundException("Membro não encontrado")
+        );
 
-        Member member = optMember.get();
+        MemberStatus pendingStatus = memberStatusService.findByName("Pendente").orElseThrow(() ->
+                new CustomNotFoundException("Status Pendente não encontrado")
+        );
 
-        if (member.getMemberStatus().getId() != 1L) throw new ConflictException("Membro não está com status pendente");
+        if (!member.getStatusId().equals(pendingStatus.getId())) {
+            throw new ConflictException("Membro não está com status pendente");
+        }
 
-        Optional<Project> optProject = projectService.findById(member.getProject().getId());
-        if (optProject.isEmpty()) throw new CustomNotFoundException("Projeto não encontrado");
+        Project project = projectRepository.findById(member.getProjectId()).orElseThrow(() ->
+                new CustomNotFoundException("Projeto não encontrado")
+        );
 
-        Project project = optProject.get();
-
-        if (projectService.isNotManager(project, userId))
+        if (!isUserProjectManager(project.getId(), userId)) {
             throw new UnauthorizedException("Usuário que solicitou alteração não é o idealizador do projeto");
+        }
 
-        MemberStatus rejectedStatus = MemberStatus.builder().id(3L).build();
+        MemberStatus rejectedStatus = memberStatusService.findByName("Rejeitado")
+                .orElseThrow(() -> new CustomNotFoundException("Status Rejeitado não encontrado"));
 
-        member.setMemberStatus(rejectedStatus);
+        member.setStatusId(rejectedStatus.getId());
         member.setApplicationFeedback(applicationFeedback);
-
         repository.save(member);
 
         return Optional.of(member);
     }
 
-    @Transactional
-    private MemberStatus findMemberStatus(MemberStatus memberStatus) {
-        return memberStatusService.findById(memberStatus.getId()).orElse(null);
+    // Métodos auxiliares, todos fazem parte da Transação caller, então nada de aninhar aqui com anotação de novo
+    // Mantido aqui pela REF: https://github.com/m42hub/m42hub-api/blob/main/src/main/java/com/m42hub/m42hub_api/project/service/ProjectService.java#L212
+    public boolean isUserProjectManager(UUID projectId, UUID userId) {
+        Optional<Member> member = repository.findByProjectIdAndUserId(projectId, userId);
+        return member.isPresent() && Boolean.TRUE.equals(member.get().getIsManager());
     }
 
-    @Transactional
-    private User findUser(User user) {
-        return userService.findById(user.getId()).orElse(null);
+    // Pode ser interessante mudar esta função de classe, assim como a de cima, pois esta é sobre Role, não sobre Status ou Membro.
+    // Mantido aqui pela REF: https://github.com/m42hub/m42hub-api/blob/main/src/main/java/com/m42hub/m42hub_api/project/service/ProjectService.java#L219
+    public boolean isRoleFilled(Project project, Long roleId) {
+        Set<Long> unfilledRoles = projectUnfilledRoleService.getRoleIdsByProject(project.getId());
+        return !unfilledRoles.contains(roleId);
     }
-
 }

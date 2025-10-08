@@ -4,6 +4,7 @@ import com.m42hub.m42hub_api.services.util.TestUtils;
 import com.m42hub.m42hub_api.user.entity.Permission;
 import com.m42hub.m42hub_api.user.repository.PermissionRepository;
 import com.m42hub.m42hub_api.user.service.PermissionService;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,21 +17,22 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.UUID;
 
 public class PermissionServiceTest {
     private static final Logger logger = LoggerFactory.getLogger(PermissionServiceTest.class);
 
-    private static final Long PRIMARY_PERMISSION_ID = 1L;
+    private final int wantedNumberOfInvocations = 1;
+
+    private final UUID PRIMARY_PERMISSION_ID = TestUtils.getRandomUUID();
     private static final String PRIMARY_PERMISSION_NAME = "create";
     private static final String PRIMARY_PERMISSION_DESC = "Pode criar algo";
 
-    private static final Long SECONDARY_PERMISSION_ID = 2L;
+    private final UUID SECONDARY_PERMISSION_ID = TestUtils.getRandomUUID();
     private static final String SECONDARY_PERMISSION_NAME = "delete";
     private static final String SECONDARY_PERMISSION_DESC = "Pode deletar algo";
 
-    private static final Long NEW_PERMISSION_ID = 3L;
+    private final UUID NEW_PERMISSION_ID = TestUtils.getRandomUUID();
     private static final String NEW_PERMISSION_NAME = "update";
     private static final String NEW_PERMISSION_DESC = "Pode atualizar algo";
 
@@ -72,10 +74,10 @@ public class PermissionServiceTest {
         List<Permission> result = permissionService.findAll();
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(permissionPrimary, permissionSecondary);
-        Mockito.verify(permissionRepository, Mockito.times(1)).findAll();
+        Mockito.verify(permissionRepository, Mockito.times(wantedNumberOfInvocations)).findAll();
     }
 
     @Test
@@ -88,16 +90,16 @@ public class PermissionServiceTest {
         Optional<Permission> result = permissionService.findById(PRIMARY_PERMISSION_ID);
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .isPresent()
                 .containsSame(permissionPrimary);
-        Mockito.verify(permissionRepository, Mockito.times(1)).findById(PRIMARY_PERMISSION_ID);
+        Mockito.verify(permissionRepository, Mockito.times(wantedNumberOfInvocations)).findById(PRIMARY_PERMISSION_ID);
     }
 
     @Test
     public void shouldReturnEmpty_whenFindByInvalidId() {
         // GIVEN
-        Long invalidId = 999L;
+        UUID invalidId = TestUtils.getRandomUUID();
         Mockito.when(permissionRepository.findById(invalidId))
                 .thenReturn(Optional.empty());
 
@@ -105,8 +107,8 @@ public class PermissionServiceTest {
         Optional<Permission> result = permissionService.findById(invalidId);
 
         // THEN
-        assertThat(result).isEmpty();
-        Mockito.verify(permissionRepository, Mockito.times(1)).findById(invalidId);
+        Assertions.assertThat(result).isEmpty();
+        Mockito.verify(permissionRepository, Mockito.times(wantedNumberOfInvocations)).findById(invalidId);
     }
 
     @Test
@@ -119,10 +121,10 @@ public class PermissionServiceTest {
         Permission result = permissionService.save(newPermission);
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .isNotNull()
                 .extracting(Permission::getId, Permission::getName)
                 .containsExactly(NEW_PERMISSION_ID, NEW_PERMISSION_NAME);
-        Mockito.verify(permissionRepository, Mockito.times(1)).save(newPermission);
+        Mockito.verify(permissionRepository, Mockito.times(wantedNumberOfInvocations)).save(newPermission);
     }
 }

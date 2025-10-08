@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/user/permission")
@@ -21,7 +22,7 @@ public class PermissionController {
 
     private final PermissionService permissionService;
 
-    @GetMapping()
+    @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('permission:get_all')")
     public ResponseEntity<List<PermissionResponse>> getAll() {
         return ResponseEntity.ok(permissionService.findAll()
@@ -32,7 +33,7 @@ public class PermissionController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('permission:get_by_id')")
-    public ResponseEntity<PermissionResponse> getById(@PathVariable Long id) {
+    public ResponseEntity<PermissionResponse> getById(@PathVariable UUID id) {
         return permissionService.findById(id)
                 .map(permission -> ResponseEntity.ok(PermissionMapper.toPermissionResponse(permission)))
                 .orElse(ResponseEntity.notFound().build());
@@ -45,6 +46,4 @@ public class PermissionController {
         Permission savedPermission = permissionService.save(newPermission);
         return ResponseEntity.status(HttpStatus.CREATED).body(PermissionMapper.toPermissionResponse(savedPermission));
     }
-
-
 }

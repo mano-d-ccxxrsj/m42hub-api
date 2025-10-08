@@ -24,8 +24,8 @@ public class TypeMapper {
                 .id(type.getId())
                 .name(type.getName())
                 .label(type.getLabel())
+                .hexColor(type.getHexColor())
                 .description(type.getDescription())
                 .build();
     }
-
 }

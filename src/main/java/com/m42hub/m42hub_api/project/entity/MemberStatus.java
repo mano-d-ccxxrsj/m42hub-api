@@ -3,15 +3,14 @@ package com.m42hub.m42hub_api.project.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Entity
+@Builder
 @Table(name = "project_member_status")
 public class MemberStatus {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "project_member_status_id")

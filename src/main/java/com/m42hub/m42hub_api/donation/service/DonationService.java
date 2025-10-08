@@ -4,6 +4,7 @@ import com.m42hub.m42hub_api.donation.entity.Donation;
 import com.m42hub.m42hub_api.donation.entity.Platform;
 import com.m42hub.m42hub_api.donation.entity.Status;
 import com.m42hub.m42hub_api.donation.entity.Type;
+import com.m42hub.m42hub_api.donation.enums.DonationSortField;
 import com.m42hub.m42hub_api.donation.repository.DonationRepository;
 import com.m42hub.m42hub_api.donation.specification.DonationSpecification;
 import com.m42hub.m42hub_api.user.entity.User;
@@ -12,7 +13,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +35,6 @@ public class DonationService {
     private final PlatformService platformService;
     private final EntityManager entityManager;
 
-
     @Transactional(readOnly = true)
     public List<Donation> findAll() {
         return repository.findAll();
@@ -40,6 +43,22 @@ public class DonationService {
     @Transactional(readOnly = true)
     public Optional<Donation> findById(UUID id) {
         return repository.findById(id);
+    }
+
+    @Transactional
+    public Donation save(Donation donation) {
+        // Obs: basta bater o olho para ver que o uso de null aqui não é interessante não os tratar.
+        User foundUser = userService.findById(donation.getUserId()).orElse(null);
+        Status foundStatus = statusService.findById(donation.getStatusId()).orElse(null);
+        Type foundType = typeService.findById(donation.getTypeId()).orElse(null);
+        Platform foundPlatform = platformService.findById(donation.getPlatformId()).orElse(null);
+
+        donation.setUserId(foundUser.getId());
+        donation.setStatusId(foundStatus.getId());
+        donation.setTypeId(foundType.getId());
+        donation.setPlatformId(foundPlatform.getId());
+
+        return repository.save(donation);
     }
 
     @Transactional(readOnly = true)
@@ -51,18 +70,18 @@ public class DonationService {
             List<Long> status,
             List<Long> type,
             List<Long> platform,
-            List<Long> user,
+            List<UUID> user,
             Date donatedAtStart,
             Date donatedAtEnd,
             BigDecimal minTotalAmount,
             BigDecimal maxTotalAmount
     ) {
         if (sortBy == null || sortBy.isEmpty()) {
-            sortBy = "amount";
+            sortBy = DonationSortField.AMOUNT.getFieldName();
         }
 
         Sort sort = Sort.by(Sort.Order.desc(sortBy));
-        if ("ASC".equalsIgnoreCase(sortDirection)) {
+        if (DonationSortField.ASC.getFieldName().equalsIgnoreCase(sortDirection)) { // Usando o mesmo Enum feito para os projetos, 
             sort = Sort.by(Sort.Order.asc(sortBy));
         }
 
@@ -101,7 +120,7 @@ public class DonationService {
             List<Long> status,
             List<Long> type,
             List<Long> platform,
-            List<Long> userIds,
+            List<UUID> userIds,
             Date donatedAtStart,
             Date donatedAtEnd,
             BigDecimal minTotalAmount,
@@ -112,40 +131,40 @@ public class DonationService {
 
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         Root<Donation> donation = criteriaQuery.from(Donation.class);
-        Join<Donation, User> user = donation.join("user");
+        Join<Donation, User> user = donation.join(DonationSortField.USER.getFieldName());
 
         criteriaQuery.select(user);
-        criteriaQuery.groupBy(user.get("id"));
+        criteriaQuery.groupBy(user.get(DonationSortField.ID.getFieldName()));
         criteriaQuery.orderBy(
-                "ASC".equalsIgnoreCase(sortDirection)
+                DonationSortField.ASC.getFieldName().equalsIgnoreCase(sortDirection)
                         ? List.of(
-                            criteriaBuilder.asc(criteriaBuilder.sum(donation.get("amount"))),
-                            criteriaBuilder.desc(criteriaBuilder.max(donation.get("donatedAt")))
-                        )
-                        :  List.of(
-                            criteriaBuilder.desc(criteriaBuilder.sum(donation.get("amount"))),
-                            criteriaBuilder.desc(criteriaBuilder.max(donation.get("donatedAt")))
-                        )
+                        criteriaBuilder.asc(criteriaBuilder.sum(donation.get(DonationSortField.AMOUNT.getFieldName()))),
+                        criteriaBuilder.desc(criteriaBuilder.max(donation.get(DonationSortField.DONATED_AT.getFieldName())))
+                )
+                        : List.of(
+                        criteriaBuilder.desc(criteriaBuilder.sum(donation.get(DonationSortField.AMOUNT.getFieldName()))),
+                        criteriaBuilder.desc(criteriaBuilder.sum(donation.get(DonationSortField.DONATED_AT.getFieldName())))
+                )
         );
 
         List<Predicate> predicates = new ArrayList<>();
         if (status != null && !status.isEmpty()) {
-            predicates.add(donation.get("status").get("id").in(status));
+            predicates.add(donation.get(DonationSortField.STATUS.getFieldName()).get(DonationSortField.ID.getFieldName()).in(status));
         }
         if (type != null && !type.isEmpty()) {
-            predicates.add(donation.get("type").get("id").in(type));
+            predicates.add(donation.get(DonationSortField.TYPE.getFieldName()).get(DonationSortField.ID.getFieldName()).in(type));
         }
         if (platform != null && !platform.isEmpty()) {
-            predicates.add(donation.get("platform").get("id").in(platform));
+            predicates.add(donation.get(DonationSortField.PLATFORM.getFieldName()).get(DonationSortField.ID.getFieldName()).in(platform));
         }
         if (userIds != null && !userIds.isEmpty()) {
-            predicates.add(user.get("id").in(userIds));
+            predicates.add(user.get(DonationSortField.ID.getFieldName()).in(userIds));
         }
         if (donatedAtStart != null) {
-            predicates.add(criteriaBuilder.greaterThanOrEqualTo(donation.get("donatedAt"), donatedAtStart));
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(donation.get(DonationSortField.DONATED_AT.getFieldName()), donatedAtStart));
         }
         if (donatedAtEnd != null) {
-            predicates.add(criteriaBuilder.lessThanOrEqualTo(donation.get("donatedAt"), donatedAtEnd));
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(donation.get(DonationSortField.DONATED_AT.getFieldName()), donatedAtEnd));
         }
         criteriaQuery.where(predicates.toArray(new Predicate[0]));
 
@@ -153,10 +172,10 @@ public class DonationService {
 
         List<Predicate> havingPredicates = new ArrayList<>();
         if (minTotalAmount != null) {
-            havingPredicates.add(criteriaBuilder.ge(criteriaBuilder.sum(donation.get("amount")), minTotalAmount));
+            havingPredicates.add(criteriaBuilder.ge(criteriaBuilder.sum(donation.get(DonationSortField.AMOUNT.getFieldName())), minTotalAmount));
         }
         if (maxTotalAmount != null) {
-            havingPredicates.add(criteriaBuilder.le(criteriaBuilder.sum(donation.get("amount")), maxTotalAmount));
+            havingPredicates.add(criteriaBuilder.le(criteriaBuilder.sum(donation.get(DonationSortField.AMOUNT.getFieldName())), maxTotalAmount));
         }
         if (!havingPredicates.isEmpty()) {
             criteriaQuery.having(havingPredicates.toArray(new Predicate[0]));
@@ -166,32 +185,4 @@ public class DonationService {
         query.setMaxResults(limit);
         return query.getResultList();
     }
-
-    @Transactional
-    public Donation save(Donation donation) {
-        donation.setUser(findUser(donation.getUser()));
-        donation.setStatus(findStatus(donation.getStatus()));
-        donation.setType(findType(donation.getType()));
-        donation.setPlatform(findPlatform(donation.getPlatform()));
-
-        return repository.save(donation);
-    }
-
-    private User findUser(User user) {
-        return userService.findById(user.getId()).orElse(null);
-    }
-
-    private Status findStatus(Status status) {
-        return statusService.findById(status.getId()).orElse(null);
-    }
-
-    private Type findType(Type type) {
-        return typeService.findById(type.getId()).orElse(null);
-    }
-
-    private Platform findPlatform(Platform platform) {
-        return platformService.findById(platform.getId()).orElse(null);
-    }
-
-
 }

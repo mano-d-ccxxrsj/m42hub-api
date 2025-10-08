@@ -4,6 +4,7 @@ import com.m42hub.m42hub_api.project.entity.Status;
 import com.m42hub.m42hub_api.project.repository.StatusRepository;
 import com.m42hub.m42hub_api.project.service.StatusService;
 import com.m42hub.m42hub_api.services.util.TestUtils;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,11 +17,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.UUID;
 
 public class StatusServiceTest {
     private static final Logger logger = LoggerFactory.getLogger(StatusServiceTest.class);
+
+    private final int wantedNumberOfInvocations = 1;
 
     private static final Long PRIMARY_STATUS_ID = 1L;
     private static final String PRIMARY_STATUS_NAME = "Concluído";
@@ -66,16 +68,16 @@ public class StatusServiceTest {
     public void shouldReturnAllStatus_whenFindAllIsCalled() {
         // GIVEN
         List<Status> statuses = List.of(statusPrimary, statusSecondary);
-        Mockito.when(statusRepository.findAll()).thenReturn(statuses);
+        Mockito.when(statusRepository.findAllByOrderByNameAsc()).thenReturn(statuses);
 
         // WHEN
         List<Status> result = statusService.findAll();
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(statusPrimary, statusSecondary);
-        Mockito.verify(statusRepository, Mockito.times(1)).findAll();
+        Mockito.verify(statusRepository, Mockito.times(wantedNumberOfInvocations)).findAllByOrderByNameAsc();
     }
 
     @Test
@@ -88,16 +90,16 @@ public class StatusServiceTest {
         Optional<Status> result = statusService.findById(PRIMARY_STATUS_ID);
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .isPresent()
                 .containsSame(statusPrimary);
-        Mockito.verify(statusRepository, Mockito.times(1)).findById(PRIMARY_STATUS_ID);
+        Mockito.verify(statusRepository, Mockito.times(wantedNumberOfInvocations)).findById(PRIMARY_STATUS_ID);
     }
 
     @Test
     public void shouldReturnEmpty_whenFindByInvalidId() {
         // GIVEN
-        Long invalidId = 999L;
+        Long invalidId = 4L;
         Mockito.when(statusRepository.findById(invalidId))
                 .thenReturn(Optional.empty());
 
@@ -105,8 +107,8 @@ public class StatusServiceTest {
         Optional<Status> result = statusService.findById(invalidId);
 
         // THEN
-        assertThat(result).isEmpty();
-        Mockito.verify(statusRepository, Mockito.times(1)).findById(invalidId);
+        Assertions.assertThat(result).isEmpty();
+        Mockito.verify(statusRepository, Mockito.times(wantedNumberOfInvocations)).findById(invalidId);
     }
 
     @Test
@@ -119,10 +121,10 @@ public class StatusServiceTest {
         Status result = statusService.save(newStatus);
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .isNotNull()
                 .extracting(Status::getId, Status::getName)
                 .containsExactly(NEW_STATUS_ID, NEW_STATUS_NAME);
-        Mockito.verify(statusRepository, Mockito.times(1)).save(newStatus);
+        Mockito.verify(statusRepository, Mockito.times(wantedNumberOfInvocations)).save(newStatus);
     }
 }

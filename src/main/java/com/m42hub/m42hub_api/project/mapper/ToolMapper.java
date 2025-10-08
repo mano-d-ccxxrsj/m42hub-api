@@ -26,5 +26,4 @@ public class ToolMapper {
                 .hexColor(tool.getHexColor())
                 .build();
     }
-
 }

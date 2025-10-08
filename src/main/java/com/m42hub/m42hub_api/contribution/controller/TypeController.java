@@ -45,6 +45,4 @@ public class TypeController {
         Type savedType = typeService.save(newType);
         return ResponseEntity.status(HttpStatus.CREATED).body(TypeMapper.toTypeResponse(savedType));
     }
-
-
 }

@@ -1,11 +1,10 @@
 package com.m42hub.m42hub_api.services.user;
 
 import com.m42hub.m42hub_api.services.util.TestUtils;
-import com.m42hub.m42hub_api.user.entity.Permission;
 import com.m42hub.m42hub_api.user.entity.SystemRole;
 import com.m42hub.m42hub_api.user.repository.SystemRoleRepository;
-import com.m42hub.m42hub_api.user.service.PermissionService;
 import com.m42hub.m42hub_api.user.service.SystemRoleService;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,37 +15,26 @@ import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.UUID;
 
 public class SystemRoleServiceTest {
     private static final Logger logger = LoggerFactory.getLogger(SystemRoleServiceTest.class);
 
-    private static final Long ADMIN_ROLE_ID = 1L;
+    private final int wantedNumberOfInvocations = 1;
+
+    private final UUID ADMIN_ROLE_ID = TestUtils.getRandomUUID();
     private static final String ADMIN_ROLE_NAME = "ADMIN";
 
-    private static final Long USER_ROLE_ID = 2L;
+    private final UUID USER_ROLE_ID = TestUtils.getRandomUUID();
     private static final String USER_ROLE_NAME = "USER";
 
-    private static final Long NEW_ROLE_ID = 3L;
+    private final UUID NEW_ROLE_ID = TestUtils.getRandomUUID();
     private static final String NEW_ROLE_NAME = "MODERATOR";
-
-    private static final Long PERM_ADMIN_ID = 1L;
-    private static final String PERM_ADMIN_NAME = "PERM_ADMIN";
-    private static final String PERM_ADMIN_DESC = "Admin Permission";
-
-    private static final Long PERM_USER_ID = 2L;
-    private static final String PERM_USER_NAME = "PERM_USER";
-    private static final String PERM_USER_DESC = "User Permission";
 
     @Mock
     private SystemRoleRepository systemRoleRepository;
-
-    @Mock
-    private PermissionService permissionService;
 
     @InjectMocks
     private SystemRoleService systemRoleService;
@@ -66,14 +54,6 @@ public class SystemRoleServiceTest {
 
         newRole = TestUtils.createRole(null, NEW_ROLE_NAME);
         savedRole = TestUtils.createRole(NEW_ROLE_ID, NEW_ROLE_NAME);
-
-        Permission adminPermission = TestUtils.createPermission(PERM_ADMIN_ID, PERM_ADMIN_NAME, PERM_ADMIN_DESC);
-        Permission userPermission = TestUtils.createPermission(PERM_USER_ID, PERM_USER_NAME, PERM_USER_DESC);
-
-        List<Permission> permissions = new ArrayList<>();
-        permissions.add(adminPermission);
-        permissions.add(userPermission);
-        newRole.setPermissions(permissions);
     }
 
     @AfterEach
@@ -91,16 +71,16 @@ public class SystemRoleServiceTest {
         List<SystemRole> result = systemRoleService.findAll();
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(adminRole, userRole);
-        Mockito.verify(systemRoleRepository, Mockito.times(1)).findAll();
+        Mockito.verify(systemRoleRepository, Mockito.times(wantedNumberOfInvocations)).findAll();
     }
 
     @Test
     public void shouldReturnEmpty_whenFindByInvalidId() {
         // GIVEN
-        Long invalidId = 999L;
+        UUID invalidId = TestUtils.getRandomUUID();
         Mockito.when(systemRoleRepository.findById(invalidId))
                 .thenReturn(Optional.empty());
 
@@ -108,8 +88,8 @@ public class SystemRoleServiceTest {
         Optional<SystemRole> result = systemRoleService.findById(invalidId);
 
         // THEN
-        assertThat(result).isEmpty();
-        Mockito.verify(systemRoleRepository, Mockito.times(1)).findById(invalidId);
+        Assertions.assertThat(result).isEmpty();
+        Mockito.verify(systemRoleRepository, Mockito.times(wantedNumberOfInvocations)).findById(invalidId);
     }
 
     @Test
@@ -122,10 +102,10 @@ public class SystemRoleServiceTest {
         SystemRole result = systemRoleService.save(newRole);
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .isNotNull()
                 .extracting(SystemRole::getId, SystemRole::getName)
                 .containsExactly(NEW_ROLE_ID, NEW_ROLE_NAME);
-        Mockito.verify(systemRoleRepository, Mockito.times(1)).save(newRole);
+        Mockito.verify(systemRoleRepository, Mockito.times(wantedNumberOfInvocations)).save(newRole);
     }
 }

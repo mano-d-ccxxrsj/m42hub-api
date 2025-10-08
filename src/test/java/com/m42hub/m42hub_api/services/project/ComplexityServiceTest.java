@@ -4,6 +4,7 @@ import com.m42hub.m42hub_api.project.entity.Complexity;
 import com.m42hub.m42hub_api.project.repository.ComplexityRepository;
 import com.m42hub.m42hub_api.project.service.ComplexityService;
 import com.m42hub.m42hub_api.services.util.TestUtils;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,12 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.UUID;
 
 public class ComplexityServiceTest {
     private static final Logger logger = LoggerFactory.getLogger(ComplexityServiceTest.class);
+
+    private final int wantedNumberOfInvocations = 1;
 
     private static final Long PRIMARY_COMPLEXITY_ID = 1L;
     private static final String PRIMARY_COMPLEXITY_NAME = "Médio";
@@ -98,11 +101,11 @@ public class ComplexityServiceTest {
         List<Complexity> result = complexityService.findAll();
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(complexityPrimary, complexitySecondary);
 
-        Mockito.verify(complexityRepository, Mockito.times(1)).findAll();
+        Mockito.verify(complexityRepository, Mockito.times(wantedNumberOfInvocations)).findAll();
     }
 
     @Test
@@ -115,17 +118,17 @@ public class ComplexityServiceTest {
         Optional<Complexity> result = complexityService.findById(PRIMARY_COMPLEXITY_ID);
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .isPresent()
                 .containsSame(complexityPrimary);
 
-        Mockito.verify(complexityRepository, Mockito.times(1)).findById(PRIMARY_COMPLEXITY_ID);
+        Mockito.verify(complexityRepository, Mockito.times(wantedNumberOfInvocations)).findById(PRIMARY_COMPLEXITY_ID);
     }
 
     @Test
     public void shouldReturnEmpty_whenFindByInvalidId() {
         // GIVEN
-        Long invalidId = 999L;
+        Long invalidId = 4L;
         Mockito.when(complexityRepository.findById(invalidId))
                 .thenReturn(Optional.empty());
 
@@ -133,8 +136,8 @@ public class ComplexityServiceTest {
         Optional<Complexity> result = complexityService.findById(invalidId);
 
         // THEN
-        assertThat(result).isEmpty();
-        Mockito.verify(complexityRepository, Mockito.times(1)).findById(invalidId);
+        Assertions.assertThat(result).isEmpty();
+        Mockito.verify(complexityRepository, Mockito.times(wantedNumberOfInvocations)).findById(invalidId);
     }
 
     @Test
@@ -147,11 +150,57 @@ public class ComplexityServiceTest {
         Complexity result = complexityService.save(newComplexity);
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .isNotNull()
                 .extracting(Complexity::getId, Complexity::getName)
                 .containsExactly(NEW_COMPLEXITY_ID, NEW_COMPLEXITY_NAME);
 
-        Mockito.verify(complexityRepository, Mockito.times(1)).save(newComplexity);
+        Mockito.verify(complexityRepository, Mockito.times(wantedNumberOfInvocations)).save(newComplexity);
+    }
+
+    @Test
+    public void shouldReturnMap_whenFindAllByIdsIsCalled() {
+        // GIVEN
+        List<Long> ids = List.of(PRIMARY_COMPLEXITY_ID, SECONDARY_COMPLEXITY_ID);
+        Mockito.when(complexityRepository.findAllById(ids))
+                .thenReturn(List.of(complexityPrimary, complexitySecondary));
+
+        // WHEN
+        Map<Long, Complexity> result = complexityService.findAllByIds(ids);
+
+        // THEN
+        Assertions.assertThat(result)
+                .hasSize(2)
+                .containsEntry(PRIMARY_COMPLEXITY_ID, complexityPrimary)
+                .containsEntry(SECONDARY_COMPLEXITY_ID, complexitySecondary);
+
+        Mockito.verify(complexityRepository, Mockito.times(wantedNumberOfInvocations)).findAllById(ids);
+    }
+
+    @Test
+    public void shouldReturnTrue_whenExistsByIdIsCalledForExisting() {
+        // GIVEN
+        Mockito.when(complexityRepository.existsById(PRIMARY_COMPLEXITY_ID)).thenReturn(true);
+
+        // WHEN
+        boolean result = complexityService.existsById(PRIMARY_COMPLEXITY_ID);
+
+        // THEN
+        Assertions.assertThat(result).isTrue();
+        Mockito.verify(complexityRepository, Mockito.times(wantedNumberOfInvocations)).existsById(PRIMARY_COMPLEXITY_ID);
+    }
+
+    @Test
+    public void shouldReturnFalse_whenExistsByIdIsCalledForNonExisting() {
+        // GIVEN
+        Long invalidId = 4L;
+        Mockito.when(complexityRepository.existsById(invalidId)).thenReturn(false);
+
+        // WHEN
+        boolean result = complexityService.existsById(invalidId);
+
+        // THEN
+        Assertions.assertThat(result).isFalse();
+        Mockito.verify(complexityRepository, Mockito.times(wantedNumberOfInvocations)).existsById(invalidId);
     }
 }

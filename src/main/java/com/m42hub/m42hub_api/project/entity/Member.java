@@ -1,12 +1,12 @@
 package com.m42hub.m42hub_api.project.entity;
 
-import com.m42hub.m42hub_api.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Builder
 @NoArgsConstructor
@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "project_members")
 public class Member {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "project_members_id")
@@ -25,26 +24,22 @@ public class Member {
     @Column(name = "is_manager", nullable = false)
     private Boolean isManager;
 
-    @ManyToOne()
-    @JoinColumn(name = "project_id", referencedColumnName = "project_id", nullable = false)
-    private Project project;
+    @Column(name = "project_id", nullable = false)
+    private UUID projectId;
 
-    @ManyToOne()
-    @JoinColumn(name = "project_role_id", referencedColumnName = "project_role_id", nullable = false)
-    private Role role;
+    @Column(name = "project_role_id", nullable = false)
+    private Long roleId;
 
-    @ManyToOne()
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
-    @ManyToOne()
-    @JoinColumn(name = "status_id", referencedColumnName = "project_member_status_id", nullable = false)
-    private MemberStatus memberStatus;
+    @Column(name = "status_id", nullable = false)
+    private Long statusId;
 
-    @Column(name="application_message")
+    @Column(name = "application_message")
     private String applicationMessage;
 
-    @Column(name="application_feedback")
+    @Column(name = "application_feedback")
     private String applicationFeedback;
 
     @CreationTimestamp
@@ -52,5 +47,4 @@ public class Member {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
 }

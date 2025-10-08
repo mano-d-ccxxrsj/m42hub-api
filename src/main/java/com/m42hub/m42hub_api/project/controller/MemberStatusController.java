@@ -21,7 +21,7 @@ public class MemberStatusController {
 
     private final MemberStatusService memberStatusService;
 
-    @GetMapping()
+    @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('status:get_all')")
     public ResponseEntity<List<MemberStatusResponse>> getAll() {
         return ResponseEntity.ok(memberStatusService.findAll()
@@ -45,6 +45,4 @@ public class MemberStatusController {
         MemberStatus savedMemberStatus = memberStatusService.save(newMemberStatus);
         return ResponseEntity.status(HttpStatus.CREATED).body(MemberStatusMapper.toMemberStatusResponse(savedMemberStatus));
     }
-
-
 }

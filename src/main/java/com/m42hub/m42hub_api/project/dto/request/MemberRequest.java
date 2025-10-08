@@ -1,14 +1,15 @@
 package com.m42hub.m42hub_api.project.dto.request;
 
-
 import jakarta.validation.constraints.NotBlank;
+
+import java.util.UUID;
 
 public record MemberRequest(
         @NotBlank(message = "Projeto é obrigatório")
-        Long projectId,
+        UUID projectId,
         @NotBlank(message = "Cargo é obrigatório")
         Long roleId,
-        Long userId,
+        UUID userId,
         String applicationMessage
 ) {
 }

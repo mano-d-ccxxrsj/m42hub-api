@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.UUID;
 
 public record DonationRequest(
         @NotBlank(message = "Nome da doação é obrigatório")
@@ -15,7 +16,7 @@ public record DonationRequest(
         @Size(min = 3, message = "Label do status deve ter no mínimo 3 caracteres")
         String summary,
         @NotNull(message = "Usuário que realizou a doação é obrigatório")
-        Long userId,
+        UUID userId,
         String description,
         String imageUrl,
         @NotNull(message = "Valor monetário da doação é obrigatório")

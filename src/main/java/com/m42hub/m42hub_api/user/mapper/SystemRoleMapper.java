@@ -13,32 +13,23 @@ import java.util.List;
 public class SystemRoleMapper {
 
     public static SystemRole toSystemRole(SystemRoleRequest request) {
-
-        List<Permission> permissions = request.permissions().stream()
-                .map(permissionId -> Permission.builder().id(permissionId).build())
-                .toList();
-
         return SystemRole
                 .builder()
                 .name(request.name())
                 .description(request.description())
-                .permissions(permissions)
                 .build();
     }
 
-    public static SystemRoleResponse toSystemRoleResponse(SystemRole systemRole) {
-
-        List<PermissionResponse> permissions = systemRole.getPermissions().stream()
+    public static SystemRoleResponse toSystemRoleResponse(SystemRole systemRole, List<Permission> permissions) {
+        List<PermissionResponse> permissionResponses = permissions.stream()
                 .map(PermissionMapper::toPermissionResponse)
                 .toList();
 
-        return SystemRoleResponse
-                .builder()
+        return SystemRoleResponse.builder()
                 .id(systemRole.getId())
                 .name(systemRole.getName())
                 .description(systemRole.getDescription())
-                .permissions(permissions)
+                .permissions(permissionResponses)
                 .build();
     }
-
 }

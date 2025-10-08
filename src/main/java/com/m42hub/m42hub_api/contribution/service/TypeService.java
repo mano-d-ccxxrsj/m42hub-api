@@ -1,8 +1,6 @@
 package com.m42hub.m42hub_api.contribution.service;
 
-import com.m42hub.m42hub_api.contribution.entity.Status;
 import com.m42hub.m42hub_api.contribution.entity.Type;
-import com.m42hub.m42hub_api.contribution.repository.StatusRepository;
 import com.m42hub.m42hub_api.contribution.repository.TypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

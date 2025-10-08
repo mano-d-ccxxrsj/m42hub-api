@@ -4,6 +4,7 @@ import com.m42hub.m42hub_api.project.entity.Tool;
 import com.m42hub.m42hub_api.project.repository.ToolRepository;
 import com.m42hub.m42hub_api.project.service.ToolService;
 import com.m42hub.m42hub_api.services.util.TestUtils;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,11 +17,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.UUID;
 
 public class ToolServiceTest {
     private static final Logger logger = LoggerFactory.getLogger(ToolServiceTest.class);
+
+    private final int wantedNumberOfInvocations = 1;
 
     private static final Long PRIMARY_TOOL_ID = 1L;
     private static final String PRIMARY_TOOL_NAME = "PrimaryTool";
@@ -38,6 +40,7 @@ public class ToolServiceTest {
     private static final String NEW_TOOL_DESC = "New tool";
 
     private static final String UPDATED_COLOR = "#FF0000";
+    private static final String NEW_COLOR = "#FF0000";
 
     @Mock
     private ToolRepository toolRepository;
@@ -51,7 +54,6 @@ public class ToolServiceTest {
     private Tool toolSecondary;
     private Tool newTool;
     private Tool savedTool;
-    private Tool updatedTool;
 
     @BeforeEach
     public void setUp() {
@@ -61,7 +63,6 @@ public class ToolServiceTest {
 
         newTool = TestUtils.createTool(null, NEW_TOOL_NAME, NEW_TOOL_HEX_COLOR, NEW_TOOL_DESC);
         savedTool = TestUtils.createTool(NEW_TOOL_ID, NEW_TOOL_NAME, NEW_TOOL_HEX_COLOR, NEW_TOOL_DESC);
-        updatedTool = TestUtils.createTool(PRIMARY_TOOL_ID, PRIMARY_TOOL_NAME, UPDATED_COLOR, PRIMARY_TOOL_DESC);
     }
 
     @AfterEach
@@ -73,16 +74,16 @@ public class ToolServiceTest {
     public void shouldReturnAllTools_whenFindAllIsCalled() {
         // GIVEN
         List<Tool> tools = List.of(toolPrimary, toolSecondary);
-        Mockito.when(toolRepository.findAll()).thenReturn(tools);
+        Mockito.when(toolRepository.findAllByOrderByNameAsc()).thenReturn(tools);
 
         // WHEN
         List<Tool> result = toolService.findAll();
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(toolPrimary, toolSecondary);
-        Mockito.verify(toolRepository, Mockito.times(1)).findAll();
+        Mockito.verify(toolRepository, Mockito.times(wantedNumberOfInvocations)).findAllByOrderByNameAsc();
     }
 
     @Test
@@ -95,16 +96,16 @@ public class ToolServiceTest {
         Optional<Tool> result = toolService.findById(PRIMARY_TOOL_ID);
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .isPresent()
                 .containsSame(toolPrimary);
-        Mockito.verify(toolRepository, Mockito.times(1)).findById(PRIMARY_TOOL_ID);
+        Mockito.verify(toolRepository, Mockito.times(wantedNumberOfInvocations)).findById(PRIMARY_TOOL_ID);
     }
 
     @Test
     public void shouldReturnEmpty_whenFindByInvalidId() {
         // GIVEN
-        Long invalidId = 999L;
+        Long invalidId = 4L;
         Mockito.when(toolRepository.findById(invalidId))
                 .thenReturn(Optional.empty());
 
@@ -112,8 +113,8 @@ public class ToolServiceTest {
         Optional<Tool> result = toolService.findById(invalidId);
 
         // THEN
-        assertThat(result).isEmpty();
-        Mockito.verify(toolRepository, Mockito.times(1)).findById(invalidId);
+        Assertions.assertThat(result).isEmpty();
+        Mockito.verify(toolRepository, Mockito.times(wantedNumberOfInvocations)).findById(invalidId);
     }
 
     @Test
@@ -126,42 +127,40 @@ public class ToolServiceTest {
         Tool result = toolService.save(newTool);
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .isNotNull()
                 .extracting(Tool::getId, Tool::getName)
                 .containsExactly(NEW_TOOL_ID, NEW_TOOL_NAME);
-        Mockito.verify(toolRepository, Mockito.times(1)).save(newTool);
+        Mockito.verify(toolRepository, Mockito.times(wantedNumberOfInvocations)).save(newTool);
     }
 
     @Test
     public void shouldChangeColorSucceed() {
         // GIVEN
-        String newColor = "#FF0000";
-
         Mockito.when(toolRepository.findById(PRIMARY_TOOL_ID))
                 .thenReturn(Optional.of(toolPrimary));
 
-        toolPrimary.setHexColor(newColor);
+        toolPrimary.setHexColor(NEW_COLOR);
 
         Mockito.when(toolRepository.save(toolPrimary))
                 .thenReturn(toolPrimary);
 
         // WHEN
-        Optional<Tool> result = toolService.changeColor(PRIMARY_TOOL_ID, newColor);
+        Optional<Tool> result = toolService.changeColor(PRIMARY_TOOL_ID, NEW_COLOR);
 
         // THEN
-        assertThat(result)
+        Assertions.assertThat(result)
                 .isPresent()
                 .containsSame(toolPrimary);
-        assertThat(toolPrimary.getHexColor()).isEqualTo(newColor);
-        Mockito.verify(toolRepository, Mockito.times(1)).findById(PRIMARY_TOOL_ID);
-        Mockito.verify(toolRepository, Mockito.times(1)).save(toolPrimary);
+        Assertions.assertThat(toolPrimary.getHexColor()).isEqualTo(NEW_COLOR);
+        Mockito.verify(toolRepository, Mockito.times(wantedNumberOfInvocations)).findById(PRIMARY_TOOL_ID);
+        Mockito.verify(toolRepository, Mockito.times(wantedNumberOfInvocations)).save(toolPrimary);
     }
 
     @Test
     public void shouldNotChangeColor_whenToolNotFound() {
         // GIVEN
-        Long invalidId = 999L;
+        Long invalidId = 4L;
         Mockito.when(toolRepository.findById(invalidId))
                 .thenReturn(Optional.empty());
 
@@ -169,8 +168,8 @@ public class ToolServiceTest {
         Optional<Tool> result = toolService.changeColor(invalidId, UPDATED_COLOR);
 
         // THEN
-        assertThat(result).isEmpty();
-        Mockito.verify(toolRepository, Mockito.times(1)).findById(invalidId);
+        Assertions.assertThat(result).isEmpty();
+        Mockito.verify(toolRepository, Mockito.times(wantedNumberOfInvocations)).findById(invalidId);
         Mockito.verify(toolRepository, Mockito.never()).save(Mockito.any());
     }
 }

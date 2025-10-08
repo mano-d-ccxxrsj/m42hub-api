@@ -3,19 +3,20 @@ package com.m42hub.m42hub_api.user.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Builder
+import java.util.UUID;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Entity
+@Builder
 @Table(name = "permissions")
 public class Permission {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "permission_id")
-    private Long id;
+    private UUID id;
 
     @Column(length = 100, nullable = false)
     private String name;

@@ -1,7 +1,9 @@
 package com.m42hub.m42hub_api.user.mapper;
 
 import com.m42hub.m42hub_api.project.dto.response.RoleResponse;
+import com.m42hub.m42hub_api.project.entity.Role;
 import com.m42hub.m42hub_api.project.mapper.RoleMapper;
+import com.m42hub.m42hub_api.user.dto.request.UserInfoRequest;
 import com.m42hub.m42hub_api.user.dto.request.UserRequest;
 import com.m42hub.m42hub_api.user.dto.response.AuthenticatedUserResponse;
 import com.m42hub.m42hub_api.user.dto.response.SystemRoleResponse;
@@ -13,14 +15,12 @@ import lombok.experimental.UtilityClass;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @UtilityClass
 public class UserMapper {
 
     public static User toUser(UserRequest request) {
-
-        SystemRole systemRole = SystemRole.builder().id(2L).build();
-
         return User
                 .builder()
                 .username(request.username().toLowerCase())
@@ -29,16 +29,24 @@ public class UserMapper {
                 .firstName(request.firstName())
                 .lastName(request.lastName())
                 .isActive(request.isActive())
-                .systemRole(systemRole)
                 .build();
     }
 
-    public static UserResponse toUserResponse(User user) {
-
-        SystemRoleResponse systemRole = SystemRoleMapper.toSystemRoleResponse(user.getSystemRole());
-
-        return UserResponse
+    public static User toUser(UserInfoRequest request) {
+        return User
                 .builder()
+                .firstName(request.firstName())
+                .lastName(request.lastName())
+                .biography(request.biography())
+                .discord(request.discord())
+                .linkedin(request.linkedin())
+                .github(request.github())
+                .personalWebsite(request.personalWebsite())
+                .build();
+    }
+
+    public static UserResponse toUserResponse(User user, SystemRoleResponse systemRole) {
+        return UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
@@ -52,17 +60,16 @@ public class UserMapper {
                 .build();
     }
 
-    public static AuthenticatedUserResponse toAuthenticatedUserResponse(User user) {
-
-        Long roleId = null;
+    public static AuthenticatedUserResponse toAuthenticatedUserResponse(User user, SystemRole systemRole) {
+        UUID roleId = null;
         String roleName = null;
-        if (user.getSystemRole() != null) {
-            roleId = user.getSystemRole().getId();
-            roleName = user.getSystemRole().getName();
+
+        if (systemRole != null) {
+            roleId = systemRole.getId();
+            roleName = systemRole.getName();
         }
 
-        return AuthenticatedUserResponse
-                .builder()
+        return AuthenticatedUserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .firstName(user.getFirstName())
@@ -74,25 +81,23 @@ public class UserMapper {
                 .build();
     }
 
-    public static UserInfoResponse toUserInfoResponse(User user) {
-
-        Long roleId = null;
+    public static UserInfoResponse toUserInfoResponse(User user, SystemRole systemRole, List<Role> interestRoles) {
+        UUID roleId = null;
         String roleName = null;
-        if (user.getSystemRole() != null) {
-            roleId = user.getSystemRole().getId();
-            roleName = user.getSystemRole().getName();
+
+        if (systemRole != null) {
+            roleId = systemRole.getId();
+            roleName = systemRole.getName();
         }
 
         List<RoleResponse> interestedRoles = new ArrayList<>();
-        if (user.getInterestRoles() != null) {
-            interestedRoles = user.getInterestRoles()
-                    .stream()
+        if (interestRoles != null && !interestRoles.isEmpty()) {
+            interestedRoles = interestRoles.stream()
                     .map(RoleMapper::toRoleResponse)
                     .toList();
         }
 
-        return UserInfoResponse
-                .builder()
+        return UserInfoResponse.builder()
                 .username(user.getUsername())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
@@ -108,5 +113,4 @@ public class UserMapper {
                 .interestRoles(interestedRoles)
                 .build();
     }
-
 }

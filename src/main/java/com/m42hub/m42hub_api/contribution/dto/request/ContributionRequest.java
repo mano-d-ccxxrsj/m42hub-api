@@ -5,13 +5,14 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.util.Date;
+import java.util.UUID;
 
 public record ContributionRequest(
         @NotBlank(message = "Label do status é obrigatório")
         @Size(min = 3, message = "Label do status deve ter no mínimo 3 caracteres")
         String name,
         @NotNull(message = "Usuário que realizou a contribuição é obrigatório")
-        Long userId,
+        UUID userId,
         String description,
         Long statusId,
         Long typeId,

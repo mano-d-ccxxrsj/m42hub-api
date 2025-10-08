@@ -24,8 +24,8 @@ public class PlatformMapper {
                 .id(platform.getId())
                 .name(platform.getName())
                 .label(platform.getLabel())
+                .hexColor(platform.getHexColor())
                 .description(platform.getDescription())
                 .build();
     }
-
 }

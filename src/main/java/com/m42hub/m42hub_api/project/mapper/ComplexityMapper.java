@@ -26,5 +26,4 @@ public class ComplexityMapper {
                 .hexColor(complexity.getHexColor())
                 .build();
     }
-
 }

@@ -45,6 +45,4 @@ public class PlatformController {
         Platform savedPlatform = platformService.save(newPlatform);
         return ResponseEntity.status(HttpStatus.CREATED).body(PlatformMapper.toPlatformResponse(savedPlatform));
     }
-
-
 }

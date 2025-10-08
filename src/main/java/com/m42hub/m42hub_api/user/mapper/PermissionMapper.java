@@ -24,5 +24,4 @@ public class PermissionMapper {
                 .description(permission.getDescription())
                 .build();
     }
-
 }

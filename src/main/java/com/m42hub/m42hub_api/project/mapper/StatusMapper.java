@@ -24,5 +24,4 @@ public class StatusMapper {
                 .description(status.getDescription())
                 .build();
     }
-
 }

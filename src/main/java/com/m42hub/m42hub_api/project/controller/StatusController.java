@@ -21,7 +21,7 @@ public class StatusController {
 
     private final StatusService statusService;
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<StatusResponse>> getAll() {
         return ResponseEntity.ok(statusService.findAll()
                 .stream()
@@ -43,6 +43,4 @@ public class StatusController {
         Status savedStatus = statusService.save(newStatus);
         return ResponseEntity.status(HttpStatus.CREATED).body(StatusMapper.toStatusResponse(savedStatus));
     }
-
-
 }

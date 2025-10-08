@@ -3,51 +3,35 @@ package com.m42hub.m42hub_api.contribution.mapper;
 import com.m42hub.m42hub_api.contribution.dto.request.ContributionRequest;
 import com.m42hub.m42hub_api.contribution.dto.response.*;
 import com.m42hub.m42hub_api.contribution.entity.Contribution;
-import com.m42hub.m42hub_api.contribution.entity.Status;
-import com.m42hub.m42hub_api.contribution.entity.Type;
 import com.m42hub.m42hub_api.user.dto.response.UserInfoResponse;
-import com.m42hub.m42hub_api.user.entity.User;
-import com.m42hub.m42hub_api.user.mapper.UserMapper;
 import lombok.experimental.UtilityClass;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @UtilityClass
 public class ContributionMapper {
 
-
     public static Contribution toContribution(ContributionRequest request) {
-
-        Status status = Status.builder().id(request.statusId()).build();
-        Type type = Type.builder().id(request.typeId()).build();
-        User user = User.builder().id(request.userId()).build();
-
-        return Contribution
-                .builder()
+        return Contribution.builder()
                 .name(request.name())
-                .user(user)
                 .description(request.description())
-                .status(status)
-                .type(type)
+                .statusId(request.statusId())
+                .typeId(request.typeId())
                 .submittedAt(request.submittedAt())
                 .approvedAt(request.approvedAt())
+                .userId(request.userId())
                 .build();
     }
 
-    public static ContributionResponse toContributionResponse(Contribution contribution) {
-
-        StatusResponse status = contribution.getStatus() != null ? StatusMapper.toStatusResponse(contribution.getStatus()) : null;
-        TypeResponse type = contribution.getType() != null ? TypeMapper.toTypeResponse(contribution.getType()) : null;
-        UserInfoResponse userInfo = contribution.getUser() != null ? UserMapper.toUserInfoResponse(contribution.getUser()) : null;
-
-        return ContributionResponse
-                .builder()
-                .name(contribution.getName())
+    public static ContributionResponse toContributionResponse(
+            Contribution contribution,
+            StatusResponse status,
+            TypeResponse type,
+            UserInfoResponse userInfo
+    ) {
+        return ContributionResponse.builder()
                 .userInfo(userInfo)
+                .name(contribution.getName())
                 .description(contribution.getDescription())
                 .status(status)
                 .type(type)
@@ -56,14 +40,13 @@ public class ContributionMapper {
                 .build();
     }
 
-    public static ContributionListItemResponse toContributionListItemResponse(Contribution contribution) {
-
-        String statusName = contribution.getStatus() != null ? contribution.getStatus().getName() : null;
-        String typeName = contribution.getType() != null ? contribution.getType().getName() : null;
-        UserInfoResponse userInfoResponse = contribution.getUser() != null ? UserMapper.toUserInfoResponse(contribution.getUser()) : null;
-
-        return ContributionListItemResponse
-                .builder()
+    public static ContributionListItemResponse toContributionListItemResponse(
+            Contribution contribution,
+            String statusName,
+            String typeName,
+            UserInfoResponse userInfo
+    ) {
+        return ContributionListItemResponse.builder()
                 .id(contribution.getId())
                 .name(contribution.getName())
                 .description(contribution.getDescription())
@@ -72,22 +55,17 @@ public class ContributionMapper {
                 .submittedAt(contribution.getSubmittedAt())
                 .approvedAt(contribution.getApprovedAt())
                 .creationDate(contribution.getCreatedAt())
-                .userInfo(userInfoResponse)
+                .userInfo(userInfo)
                 .build();
     }
 
-    public static List<ContributionsByUserResponse> toContributionsByUserResponse(List<Contribution> contributions) {
-        Map<User, List<Contribution>> grouped = contributions.stream()
-                .collect(Collectors.groupingBy(Contribution::getUser));
-
-        return grouped.entrySet().stream()
-                .map(entry -> ContributionsByUserResponse.builder()
-                        .userInfo(UserMapper.toUserInfoResponse(entry.getKey()))
-                        .contributions(entry.getValue().stream()
-                                .map(ContributionMapper::toContributionListItemResponse)
-                                .toList())
-                        .build())
-                .toList();
+    public static ContributionsByUserResponse toContributionsByUserResponse(
+            UserInfoResponse userInfo,
+            List<ContributionListItemResponse> contributions
+    ) {
+        return ContributionsByUserResponse.builder()
+                .userInfo(userInfo)
+                .contributions(contributions)
+                .build();
     }
-
 }
