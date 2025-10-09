@@ -106,10 +106,19 @@ public class ContributionController {
 
         List<ContributionsByUserResponse> response = new ArrayList<>(ContributionMapper.toContributionsByUserResponse(contributions.getContent()));
 
-        Comparator<ContributionsByUserResponse> comparator = Comparator.comparingInt(item -> item.contributions().size());
+        Comparator<ContributionsByUserResponse> comparator = Comparator
+                .comparingInt((ContributionsByUserResponse item) -> item.contributions().size());
+
+        comparator = comparator.thenComparing(item -> item.contributions().stream()
+                .map(ContributionListItemResponse::approvedAt)
+                .filter(Objects::nonNull)
+                .max(Date::compareTo)
+                .orElse(new Date(0)));
+
         if ("DESC".equalsIgnoreCase(sortDirection)) {
             comparator = comparator.reversed();
         }
+
         response.sort(comparator);
 
         return ResponseEntity.ok(response);

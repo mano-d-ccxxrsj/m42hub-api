@@ -118,8 +118,14 @@ public class DonationService {
         criteriaQuery.groupBy(user.get("id"));
         criteriaQuery.orderBy(
                 "ASC".equalsIgnoreCase(sortDirection)
-                        ? criteriaBuilder.asc(criteriaBuilder.sum(donation.get("amount")))
-                        : criteriaBuilder.desc(criteriaBuilder.sum(donation.get("amount")))
+                        ? List.of(
+                            criteriaBuilder.asc(criteriaBuilder.sum(donation.get("amount"))),
+                            criteriaBuilder.desc(criteriaBuilder.max(donation.get("donatedAt")))
+                        )
+                        :  List.of(
+                            criteriaBuilder.desc(criteriaBuilder.sum(donation.get("amount"))),
+                            criteriaBuilder.desc(criteriaBuilder.max(donation.get("donatedAt")))
+                        )
         );
 
         List<Predicate> predicates = new ArrayList<>();
