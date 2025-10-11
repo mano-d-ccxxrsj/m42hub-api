@@ -1,25 +1,6 @@
 spring:
   application:
     name: m42hub-api
-
-  datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-
-  flyway:
-    enable: true
-
-m42hub:
-  security:
-    secret: ${SECRET}
-    cookie-secure: false
-
-cors:
-  allowed-origins:
-    http://localhost:4200
-    https://www.m42hub.com
-
-imgBB:
-  upload-url: ${IMGBB_UPLOAD_URL}
+  profiles:
+    active: dev
+# dev ou prod environment
