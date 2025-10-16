@@ -1,27 +1,30 @@
-package com.m42hub.m42hub_api.profanity.service;
+package com.m42hub.m42hub_api.abuse.service;
 
-import com.m42hub.m42hub_api.profanity.entity.BannedWord;
-import com.m42hub.m42hub_api.profanity.entity.WordFlag;
-import com.m42hub.m42hub_api.profanity.repository.BannedWordRepository;
-import com.m42hub.m42hub_api.profanity.repository.WordFlagRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.m42hub.m42hub_api.abuse.entity.BannedWord;
+import com.m42hub.m42hub_api.abuse.entity.UserFlag;
+import com.m42hub.m42hub_api.abuse.repository.BannedWordRepository;
+import com.m42hub.m42hub_api.abuse.repository.UserFlagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.*;
 
 @Service
 public class ProfanityService {
 
     private final BannedWordRepository bannedWordRepository;
-    private final WordFlagRepository wordFlagRepository;
+    private final UserFlagRepository userFlagRepository;
     private Set<String> forbiddenWords;
 
     @Autowired
-    public ProfanityService(BannedWordRepository bannedWordRepository, WordFlagRepository wordFlagRepository) {
+    public ProfanityService(BannedWordRepository bannedWordRepository, UserFlagRepository userFlagRepository) {
         this.bannedWordRepository = bannedWordRepository;
-        this.wordFlagRepository = wordFlagRepository;
+        this.userFlagRepository = userFlagRepository;
         this.reloadForbiddenWords();
     }
 
@@ -32,6 +35,18 @@ public class ProfanityService {
             normalized.add(this.compress(this.normalize(bw.getWord())));
         }
         forbiddenWords = normalized;
+    }
+
+    public Set<String> getForbiddenWords() {
+        return new HashSet<>(forbiddenWords);
+    }
+
+    public void addToCache(String word) {
+        forbiddenWords.add(this.compress(this.normalize(word)));
+    }
+
+    public void removeFromCache(String word) {
+        forbiddenWords.remove(this.compress(this.normalize(word)));
     }
 
     /**
@@ -52,7 +67,36 @@ public class ProfanityService {
      * userData.id();
      * </pre></blockquote>
      * */
-    public void validate(String text, UUID userId, String field, String action) {
+    public void validate(String jsonPayload, Long userId, String method, String endpoint) {
+        if (jsonPayload == null || jsonPayload.trim().isEmpty()) return;
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(jsonPayload);
+
+            Iterator<String> fieldNames = jsonNode.fieldNames();
+            while (fieldNames.hasNext()) {
+                String fieldName = fieldNames.next();
+                JsonNode value = jsonNode.get(fieldName);
+
+                if (value.isTextual()) {
+                    String textValue = value.asText();
+                    this.validateField(textValue, userId, fieldName, method, endpoint);
+                } else if (value.isArray()) {
+                    for (JsonNode element : value) {
+                        if (element.isTextual()) {
+                            String textValue = element.asText();
+                            this.validateField(textValue, userId, fieldName, method, endpoint);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payload JSON inválido");
+        }
+    }
+
+    private void validateField(String text, Long userId, String field, String method, String endpoint) {
         if (text == null || text.trim().isEmpty()) return;
 
         List<String> matched = new ArrayList<>();
@@ -60,8 +104,8 @@ public class ProfanityService {
         matched.addAll(this.findForbiddenSequencesInText(text, matched));
 
         if (!matched.isEmpty()) {
-            this.logFlag(userId, field, action, text, matched);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Palavras proibidas detectadas: " + String.join(", ", matched));
+            this.logFlag(userId, field, method, endpoint, text, matched);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ação não permitida pois viola nossas regras de conduta");
         }
     }
 
@@ -105,14 +149,31 @@ public class ProfanityService {
         return sb.toString();
     }
 
-    private void logFlag(UUID userId, String field, String action, String text, List<String> matched) {
-        WordFlag flag = new WordFlag();
+    private void logFlag(Long userId, String field, String action, String endpoint, String attemptedText, List<String> matched) {
+        UserFlag flag = new UserFlag();
         flag.setUserId(userId);
         flag.setField(field);
         flag.setAction(action);
-        flag.setAttemptedText(text);
+        flag.setTargetEndpoint(endpoint);
+        flag.setAttemptedText(attemptedText);
         flag.setMatchedWords(String.join(", ", matched));
-        wordFlagRepository.save(flag);
+        flag.setDetails(String.format(
+                """
+                Usuário ID: %d
+                Campo: '%s'
+                Método: %s
+                Endpoint: %s
+                Texto: '%s'
+                Palavras proibidas: %s
+                """,
+                userId,
+                field,
+                action,
+                endpoint,
+                attemptedText,
+                String.join(", ", matched)
+        ));
+        userFlagRepository.save(flag);
     }
 
     private String[] splitIntoWords(String text) {
@@ -138,7 +199,7 @@ public class ProfanityService {
         return c == ' ' || c == '\t' || c == '\n' || c == '\r';
     }
 
-    private String normalize(String word) {
+    public String normalize(String word) {
         if (word == null || word.isEmpty()) return "";
 
         Map<Character, Character> map = Map.ofEntries(
@@ -178,7 +239,7 @@ public class ProfanityService {
         return sb.toString();
     }
 
-    private String compress(String word) {
+    public String compress(String word) {
         if (word == null || word.isEmpty()) return word;
         StringBuilder sb = new StringBuilder();
         char prev = 0;

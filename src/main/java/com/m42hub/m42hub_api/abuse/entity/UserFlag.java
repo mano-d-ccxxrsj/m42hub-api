@@ -1,4 +1,4 @@
-package com.m42hub.m42hub_api.profanity.entity;
+package com.m42hub.m42hub_api.abuse.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,23 +12,30 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "word_flags")
-public class WordFlag {
+@Table(name = "user_flags")
+public class UserFlag {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private UUID userId;
+    private Long userId;
 
     private String field;
 
     private String action;
 
     @Column(columnDefinition = "TEXT")
+    private String targetEndpoint;
+
+    @Column(columnDefinition = "TEXT")
     private String attemptedText;
 
     @Column(columnDefinition = "TEXT")
     private String matchedWords;
+
+    @Column(columnDefinition = "TEXT")
+    private String details;
 
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt = LocalDateTime.now();

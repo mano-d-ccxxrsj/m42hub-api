@@ -1,4 +1,4 @@
-package com.m42hub.m42hub_api.profanity.entity;
+package com.m42hub.m42hub_api.abuse.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
