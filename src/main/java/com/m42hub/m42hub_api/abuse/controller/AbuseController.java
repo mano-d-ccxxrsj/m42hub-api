@@ -36,17 +36,19 @@ public class AbuseController {
     private final AbuseService abuseService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('abuse:create')")
     public ResponseEntity<AbuseResponse> createAbuse(@Valid @RequestBody AbuseRequest request) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(AbuseMapper.toAbuseResponse(abuseService.createAbuse(AbuseMapper.toAbuse(request), userData.id(), request.reasonCategoryId())));
+                .body(AbuseMapper.toAbuseResponse(abuseService.createAbuse(AbuseMapper.toAbuse(request), userData.id(),
+                        request.reasonCategoryId())));
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('abuse:get-all')")
     public ResponseEntity<Page<AbuseResponse>> getAllAbuses(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer limit,
@@ -67,7 +69,7 @@ public class AbuseController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('abuse:get-one')")
     public ResponseEntity<AbuseResponse> getAbuseById(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(AbuseMapper.toAbuseResponse(abuseService.findById(id)));
@@ -77,7 +79,7 @@ public class AbuseController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('abuse:update')")
     public ResponseEntity<AbuseResponse> updateStatus(@PathVariable Long id, @RequestParam AbuseStatusEnum status) {
         return ResponseEntity.ok(AbuseMapper.toAbuseResponse(abuseService.updateStatus(id, status)));
     }

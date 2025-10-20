@@ -3,6 +3,7 @@ package com.m42hub.m42hub_api.abuse.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,7 @@ public class AbuseCategoryController {
     private final AbuseCategoryService service;
 
     @GetMapping()
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('project:update')")
     public ResponseEntity<List<AbuseCategoryResponse>> getAllAbuses() {
         return ResponseEntity.ok(service.findAll().stream().map(AbuseCategoryMapper::toAbuseCategoryResponse).toList());
     }
