@@ -42,7 +42,7 @@ public class AbuseController {
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(AbuseMapper.toAbuseResponse(abuseService.createAbuse(request, userData.id())));
+                .body(AbuseMapper.toAbuseResponse(abuseService.createAbuse(AbuseMapper.toAbuse(request), userData.id(), request.reasonCategoryId())));
     }
 
     @GetMapping

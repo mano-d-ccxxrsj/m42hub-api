@@ -11,17 +11,15 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.m42hub.m42hub_api.abuse.dto.request.AbuseRequest;
 import com.m42hub.m42hub_api.abuse.entity.Abuse;
 import com.m42hub.m42hub_api.abuse.entity.AbuseCategory;
 import com.m42hub.m42hub_api.abuse.enums.AbuseStatusEnum;
 import com.m42hub.m42hub_api.abuse.enums.TargetTypeAbuseEnum;
-import com.m42hub.m42hub_api.abuse.mapper.AbuseMapper;
 import com.m42hub.m42hub_api.abuse.repository.AbuseCategoryRepository;
 import com.m42hub.m42hub_api.abuse.repository.AbuseRepository;
 import com.m42hub.m42hub_api.abuse.specification.AbuseSpecification;
 import com.m42hub.m42hub_api.user.entity.User;
-import com.m42hub.m42hub_api.user.repository.UserRepository;
+import com.m42hub.m42hub_api.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,19 +29,20 @@ public class AbuseService {
 
     private final AbuseRepository abuseRepository;
     private final AbuseCategoryRepository abuseCategoryRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Transactional
-    public Abuse createAbuse(AbuseRequest request, Long reporterId) {
-        User reporter = userRepository.findById(reporterId)
+    public Abuse createAbuse(Abuse entity, Long reporterId, Long reasonCategoryId) {
+        User reporter = userService.findById(reporterId)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        AbuseCategory category = abuseCategoryRepository.findById(request.reasonCategoryId())
+        AbuseCategory category = abuseCategoryRepository.findById(reasonCategoryId)
                 .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
 
-        Abuse abuse = AbuseMapper.toAbuse(request, reporter, category);
+        entity.setReporter(reporter);
+        entity.setReasonCategory(category);
 
-        return abuseRepository.save(abuse);
+        return abuseRepository.save(entity);
     }
 
     public List<Abuse> findAll() {
