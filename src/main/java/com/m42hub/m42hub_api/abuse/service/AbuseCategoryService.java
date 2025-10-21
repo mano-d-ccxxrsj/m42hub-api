@@ -24,4 +24,8 @@ public class AbuseCategoryService {
                 .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
     }
 
+    public AbuseCategory create(AbuseCategory category) {
+        return repository.save(category);
+    }
+
 }
