@@ -24,9 +24,9 @@ public class AbuseMapper {
                 abuse.getReporter().getUsername(),
                 abuse.getTargetType().getDisplayName(),
                 abuse.getTargetId(),
-                abuse.getReasonCategory() != null ? abuse.getReasonCategory().getName() : null,
+                abuse.getReasonCategory() != null ? abuse.getReasonCategory().getLabel() : null,
                 abuse.getReasonText(),
-                abuse.getStatus() != null ? abuse.getStatus().getName() : null,
+                abuse.getStatus() != null ? abuse.getStatus().getLabel() : null,
                 abuse.getCreatedAt(),
                 abuse.getResolvedAt());
     }

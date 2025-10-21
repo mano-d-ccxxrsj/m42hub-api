@@ -9,6 +9,7 @@ public class AbuseStatusMapper {
         return new AbuseStatusResponse(
                 abuseStatus.getId(),
                 abuseStatus.getName(),
+                abuseStatus.getLabel(),
                 abuseStatus.getDescription());
     }
 }

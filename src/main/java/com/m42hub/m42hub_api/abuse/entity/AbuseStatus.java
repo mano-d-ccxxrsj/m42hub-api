@@ -22,6 +22,9 @@ public class AbuseStatus {
     @Column(name = "name", nullable = false, unique = true, length = 50)
     private String name;
 
+    @Column(name = "label", nullable = false, length = 100)
+    private String label;
+
     @Column(name = "description")
     private String description;
 }

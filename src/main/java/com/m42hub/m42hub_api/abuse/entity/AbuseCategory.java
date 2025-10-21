@@ -29,6 +29,9 @@ public class AbuseCategory {
     @Column(nullable = false, unique = true, length = 50)
     private String name;
 
+    @Column(nullable = false, length = 100)
+    private String label;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 }

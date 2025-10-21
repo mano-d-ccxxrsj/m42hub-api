@@ -9,6 +9,6 @@ import lombok.experimental.UtilityClass;
 public class AbuseCategoryMapper {
 
     public AbuseCategoryResponse toAbuseCategoryResponse(AbuseCategory entity) {
-        return new AbuseCategoryResponse(entity.getId(), entity.getName(), entity.getDescription());
+        return new AbuseCategoryResponse(entity.getId(), entity.getName(), entity.getLabel(), entity.getDescription());
     }
 }

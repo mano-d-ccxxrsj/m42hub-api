@@ -8,9 +8,9 @@ public record AbuseResponse(
     String reporterUsername,
     String targetType,
     Long targetId,
-    String reasonCategoryName,
+    String reasonCategoryLabel,
     String reasonText,
-    String status,
+    String statusLabel,
     LocalDateTime createdAt,
     LocalDateTime resolvedAt
 ) {}
