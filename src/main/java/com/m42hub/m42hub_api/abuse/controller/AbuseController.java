@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.m42hub.m42hub_api.abuse.dto.request.AbuseRequest;
 import com.m42hub.m42hub_api.abuse.dto.response.AbuseResponse;
-import com.m42hub.m42hub_api.abuse.enums.AbuseStatusEnum;
 import com.m42hub.m42hub_api.abuse.enums.TargetTypeAbuseEnum;
 import com.m42hub.m42hub_api.abuse.mapper.AbuseMapper;
 import com.m42hub.m42hub_api.abuse.service.AbuseService;
@@ -80,7 +79,7 @@ public class AbuseController {
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('abuse:update')")
-    public ResponseEntity<AbuseResponse> updateStatus(@PathVariable Long id, @RequestParam AbuseStatusEnum status) {
+    public ResponseEntity<AbuseResponse> updateStatus(@PathVariable Long id, @RequestParam Long status) {
         return ResponseEntity.ok(AbuseMapper.toAbuseResponse(abuseService.updateStatus(id, status)));
     }
 }
