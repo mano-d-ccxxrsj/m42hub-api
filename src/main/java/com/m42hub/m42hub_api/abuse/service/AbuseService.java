@@ -13,9 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.m42hub.m42hub_api.abuse.entity.Abuse;
 import com.m42hub.m42hub_api.abuse.entity.AbuseCategory;
-import com.m42hub.m42hub_api.abuse.enums.AbuseStatusEnum;
+import com.m42hub.m42hub_api.abuse.entity.AbuseStatus;
 import com.m42hub.m42hub_api.abuse.enums.TargetTypeAbuseEnum;
-import com.m42hub.m42hub_api.abuse.repository.AbuseCategoryRepository;
 import com.m42hub.m42hub_api.abuse.repository.AbuseRepository;
 import com.m42hub.m42hub_api.abuse.specification.AbuseSpecification;
 import com.m42hub.m42hub_api.user.entity.User;
@@ -28,7 +27,8 @@ import lombok.RequiredArgsConstructor;
 public class AbuseService {
 
     private final AbuseRepository abuseRepository;
-    private final AbuseCategoryRepository abuseCategoryRepository;
+    private final AbuseCategoryService abuseCategoryService;
+    private final AbuseStatusService abuseStatusService;
     private final UserService userService;
 
     @Transactional
@@ -36,11 +36,14 @@ public class AbuseService {
         User reporter = userService.findById(reporterId)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        AbuseCategory category = abuseCategoryRepository.findById(reasonCategoryId)
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+        AbuseCategory category = abuseCategoryService.findById(reasonCategoryId);
+
+        // Define status inicial como OPEN
+        AbuseStatus openStatus = abuseStatusService.findByName("OPEN");
 
         entity.setReporter(reporter);
         entity.setReasonCategory(category);
+        entity.setStatus(openStatus);
 
         return abuseRepository.save(entity);
     }
@@ -102,11 +105,14 @@ public class AbuseService {
     }
 
     @Transactional
-    public Abuse updateStatus(Long id, AbuseStatusEnum status) {
+    public Abuse updateStatus(Long id, Long status) {
         Abuse abuse = findById(id);
-        abuse.setStatus(status);
 
-        if (status.equals(AbuseStatusEnum.CLOSED) || status.equals(AbuseStatusEnum.RESOLVED)) {
+        AbuseStatus statusEntity = abuseStatusService.findById(status);
+
+        abuse.setStatus(statusEntity);
+
+        if ("CLOSED".equals(statusEntity.getName()) || "RESOLVED".equals(statusEntity.getName())) {
             abuse.setResolvedAt(LocalDateTime.now());
         }
 

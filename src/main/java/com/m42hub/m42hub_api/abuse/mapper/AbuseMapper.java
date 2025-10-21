@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import com.m42hub.m42hub_api.abuse.dto.request.AbuseRequest;
 import com.m42hub.m42hub_api.abuse.dto.response.AbuseResponse;
 import com.m42hub.m42hub_api.abuse.entity.Abuse;
-import com.m42hub.m42hub_api.abuse.enums.AbuseStatusEnum;
 
 public class AbuseMapper {
 
@@ -14,7 +13,6 @@ public class AbuseMapper {
                 .targetType(request.targetType())
                 .targetId(request.targetId())
                 .reasonText(request.reasonText())
-                .status(AbuseStatusEnum.OPEN)
                 .createdAt(LocalDateTime.now())
                 .build();
     }
@@ -28,7 +26,7 @@ public class AbuseMapper {
                 abuse.getTargetId(),
                 abuse.getReasonCategory() != null ? abuse.getReasonCategory().getName() : null,
                 abuse.getReasonText(),
-                abuse.getStatus().getDisplayName(),
+                abuse.getStatus() != null ? abuse.getStatus().getName() : null,
                 abuse.getCreatedAt(),
                 abuse.getResolvedAt());
     }

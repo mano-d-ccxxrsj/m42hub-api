@@ -2,7 +2,6 @@ package com.m42hub.m42hub_api.abuse.entity;
 
 import java.time.LocalDateTime;
 
-import com.m42hub.m42hub_api.abuse.enums.AbuseStatusEnum;
 import com.m42hub.m42hub_api.abuse.enums.TargetTypeAbuseEnum;
 import com.m42hub.m42hub_api.user.entity.User;
 
@@ -54,9 +53,9 @@ public class Abuse {
     @Column(name = "reason_text", columnDefinition = "TEXT", nullable = false)
     private String reasonText;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20, nullable = false)
-    private AbuseStatusEnum status;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "status_id", referencedColumnName = "abuse_status_id", nullable = false)
+    private AbuseStatus status;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

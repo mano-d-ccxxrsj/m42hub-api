@@ -19,4 +19,9 @@ public class AbuseCategoryService {
         return repository.findAll();
     }
 
+    public AbuseCategory findById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+    }
+
 }

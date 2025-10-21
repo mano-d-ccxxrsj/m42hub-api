@@ -14,7 +14,7 @@ public class AbuseSpecification {
             if (statuses == null || statuses.isEmpty()) {
                 return criteriaBuilder.conjunction();
             }
-            return root.get("status").in(statuses);
+            return root.get("status").get("name").in(statuses);
         };
     }
 
