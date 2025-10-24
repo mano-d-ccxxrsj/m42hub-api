@@ -1,5 +1,6 @@
 package com.m42hub.m42hub_api.services.util;
 
+import com.m42hub.m42hub_api.abuse.entity.AbuseCategory;
 import com.m42hub.m42hub_api.project.entity.*;
 import com.m42hub.m42hub_api.user.entity.Permission;
 import com.m42hub.m42hub_api.user.entity.SystemRole;
@@ -139,6 +140,14 @@ public class TestUtils {
                 .id(id)
                 .name(name)
                 .hexColor(hexColor)
+                .description(description)
+                .build();
+    }
+
+    public static AbuseCategory createAbuseCategory(Long id, String name, String description) {
+        return AbuseCategory.builder()
+                .id(id)
+                .name(name)
                 .description(description)
                 .build();
     }
