@@ -73,7 +73,7 @@ public class ToolServiceTest {
     public void shouldReturnAllTools_whenFindAllIsCalled() {
         // GIVEN
         List<Tool> tools = List.of(toolPrimary, toolSecondary);
-        Mockito.when(toolRepository.findAll()).thenReturn(tools);
+        Mockito.when(toolRepository.findAllByOrderByNameAsc()).thenReturn(tools);
 
         // WHEN
         List<Tool> result = toolService.findAll();
@@ -82,7 +82,7 @@ public class ToolServiceTest {
         assertThat(result)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(toolPrimary, toolSecondary);
-        Mockito.verify(toolRepository, Mockito.times(1)).findAll();
+        Mockito.verify(toolRepository, Mockito.times(1)).findAllByOrderByNameAsc();
     }
 
     @Test

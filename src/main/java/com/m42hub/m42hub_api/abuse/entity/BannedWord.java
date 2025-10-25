@@ -16,11 +16,12 @@ public class BannedWord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "banned_word_id")
     private UUID id;
 
     @Column(nullable = false, unique = true)
     private String word;
 
     @Column(nullable = false)
-    private boolean active = true;
+    private boolean isActive = true;
 }

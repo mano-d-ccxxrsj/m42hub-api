@@ -66,7 +66,7 @@ public class RoleServiceTest {
     public void shouldReturnAllRoles_whenFindAllIsCalled() {
         // GIVEN
         List<Role> roles = List.of(rolePrimary, roleSecondary);
-        Mockito.when(roleRepository.findAll()).thenReturn(roles);
+        Mockito.when(roleRepository.findAllByOrderByNameAsc()).thenReturn(roles);
 
         // WHEN
         List<Role> result = roleService.findAll();
@@ -75,7 +75,7 @@ public class RoleServiceTest {
         assertThat(result)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(rolePrimary, roleSecondary);
-        Mockito.verify(roleRepository, Mockito.times(1)).findAll();
+        Mockito.verify(roleRepository, Mockito.times(1)).findAllByOrderByNameAsc();
     }
 
     @Test

@@ -66,7 +66,7 @@ public class StatusServiceTest {
     public void shouldReturnAllStatus_whenFindAllIsCalled() {
         // GIVEN
         List<Status> statuses = List.of(statusPrimary, statusSecondary);
-        Mockito.when(statusRepository.findAll()).thenReturn(statuses);
+        Mockito.when(statusRepository.findAllByOrderByNameAsc()).thenReturn(statuses);
 
         // WHEN
         List<Status> result = statusService.findAll();
@@ -75,7 +75,7 @@ public class StatusServiceTest {
         assertThat(result)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(statusPrimary, statusSecondary);
-        Mockito.verify(statusRepository, Mockito.times(1)).findAll();
+        Mockito.verify(statusRepository, Mockito.times(1)).findAllByOrderByNameAsc();
     }
 
     @Test

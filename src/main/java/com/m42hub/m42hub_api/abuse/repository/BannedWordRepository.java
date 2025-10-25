@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface BannedWordRepository extends JpaRepository<BannedWord, UUID> {
-    List<BannedWord> findByActiveTrue();
+    List<BannedWord> findByIsActiveTrue();
+    List<BannedWord> findAllByOrderByWordAsc();
     Optional<BannedWord> findByWord(String word);
 }

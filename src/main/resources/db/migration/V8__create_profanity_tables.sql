@@ -1,12 +1,12 @@
 CREATE TABLE banned_words (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    banned_word_id UUID PRIMARY KEY,
     word VARCHAR(255) NOT NULL UNIQUE,
-    active BOOLEAN NOT NULL DEFAULT TRUE
+    is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE TABLE user_flags (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id SERIAL,
+    user_flag_id UUID PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(user_id),
     field VARCHAR(255),
     action VARCHAR(255),
     attempted_text TEXT,

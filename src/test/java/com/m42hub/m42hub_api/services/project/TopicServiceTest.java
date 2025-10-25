@@ -71,7 +71,7 @@ public class TopicServiceTest {
     public void shouldReturnAllTopics_whenFindAllIsCalled() {
         // GIVEN
         List<Topic> topics = List.of(topicPrimary, topicSecondary);
-        Mockito.when(topicRepository.findAll()).thenReturn(topics);
+        Mockito.when(topicRepository.findAllByOrderByNameAsc()).thenReturn(topics);
 
         // WHEN
         List<Topic> result = topicService.findAll();
@@ -80,7 +80,7 @@ public class TopicServiceTest {
         assertThat(result)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(topicPrimary, topicSecondary);
-        Mockito.verify(topicRepository, Mockito.times(1)).findAll();
+        Mockito.verify(topicRepository, Mockito.times(1)).findAllByOrderByNameAsc();
     }
 
     @Test

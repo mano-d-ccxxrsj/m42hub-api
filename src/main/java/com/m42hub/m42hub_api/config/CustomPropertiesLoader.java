@@ -89,33 +89,13 @@ public class CustomPropertiesLoader {
     }
 
     private static Properties loadEnv() {
-        try {
-            return loadExampleEnv();
-        } catch (IOException e1) {
-            logger.info("Falha ao carregar example.env: {}", e1.getMessage());
-            try {
-                return loadDefaultEnv();
-            } catch (IOException e2) {
-                logger.error("Falha ao carregar .env: {}", e2.getMessage());
-                return new Properties();
-            }
-        }
-    }
-
-    private static Properties loadExampleEnv() throws IOException {
-        Properties props = new Properties();
-        try (FileInputStream fis = new FileInputStream("example.env")) {
-            props.load(fis);
-            logger.info("Arquivo example.env carregado com sucesso");
-        }
-        return props;
-    }
-
-    private static Properties loadDefaultEnv() throws IOException {
         Properties props = new Properties();
         try (FileInputStream fis = new FileInputStream(".env")) {
             props.load(fis);
             logger.info("Arquivo .env carregado com sucesso");
+        } catch (IOException e) {
+            logger.error("Falha ao carregar .env: {}", e.getMessage());
+            return new Properties();
         }
         return props;
     }

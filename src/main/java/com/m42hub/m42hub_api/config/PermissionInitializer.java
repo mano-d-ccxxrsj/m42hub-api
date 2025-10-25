@@ -4,7 +4,6 @@ import com.m42hub.m42hub_api.user.service.PermissionService;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
@@ -17,10 +16,9 @@ import java.util.regex.Pattern;
 
 @Component
 @RequiredArgsConstructor
-public class PermisionInitializer {
+public class PermissionInitializer {
 
-    @Autowired
-    private PermissionService permissionService;
+    private final PermissionService permissionService;
 
     @PostConstruct
     @Transactional
@@ -48,6 +46,4 @@ public class PermisionInitializer {
             }
         }
     }
-
-
 }

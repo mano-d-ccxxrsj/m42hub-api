@@ -92,7 +92,7 @@ public class ComplexityServiceTest {
     public void shouldReturnAllComplexities_whenFindAllIsCalled() {
         // GIVEN
         List<Complexity> complexities = List.of(complexityPrimary, complexitySecondary);
-        Mockito.when(complexityRepository.findAll()).thenReturn(complexities);
+        Mockito.when(complexityRepository.findAllByOrderByNameAsc()).thenReturn(complexities);
 
         // WHEN
         List<Complexity> result = complexityService.findAll();
@@ -102,7 +102,7 @@ public class ComplexityServiceTest {
                 .hasSize(2)
                 .containsExactlyInAnyOrder(complexityPrimary, complexitySecondary);
 
-        Mockito.verify(complexityRepository, Mockito.times(1)).findAll();
+        Mockito.verify(complexityRepository, Mockito.times(1)).findAllByOrderByNameAsc();
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.m42hub.m42hub_api.abuse.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -37,6 +38,6 @@ public class UserFlag {
     @Column(columnDefinition = "TEXT")
     private String details;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 }

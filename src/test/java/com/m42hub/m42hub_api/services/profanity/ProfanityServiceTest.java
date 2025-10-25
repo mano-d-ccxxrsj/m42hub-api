@@ -1,10 +1,7 @@
 package com.m42hub.m42hub_api.services.profanity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.m42hub.m42hub_api.abuse.entity.BannedWord;
 import com.m42hub.m42hub_api.abuse.repository.BannedWordRepository;
-import com.m42hub.m42hub_api.abuse.repository.UserFlagRepository;
 import com.m42hub.m42hub_api.abuse.service.ProfanityService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -14,30 +11,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class ProfanityServiceTest {
-
-    record TestRawRequestContent(String payload) {}
-
-    private static final Long TEST_USER_ID = 1L;
+    private final Logger logger = LoggerFactory.getLogger(ProfanityServiceTest.class);
 
     private static final String BAD_WORD_1 = "curse";
     private static final String BAD_WORD_2 = "xingamento";
 
-    private static final String FIELD = "field-github-ou-algo-assim-na-request";
-    private static final String ACTION = "PATCH";
-
     @Mock
     private BannedWordRepository bannedWordRepository;
-
-    @Mock
-    private UserFlagRepository userFlagRepository;
 
     @InjectMocks
     private ProfanityService profanityService;
@@ -52,8 +38,8 @@ public class ProfanityServiceTest {
                 new BannedWord(UUID.randomUUID(), BAD_WORD_1, true),
                 new BannedWord(UUID.randomUUID(), BAD_WORD_2, true)
         );
-
-        Mockito.when(bannedWordRepository.findByActiveTrue()).thenReturn(bannedWords);
+        // É chamado no construtor da classe real de testes pela função: reloadForbiddenWords()
+        Mockito.when(bannedWordRepository.findByIsActiveTrue()).thenReturn(bannedWords);
         profanityService.reloadForbiddenWords();
     }
 
@@ -63,110 +49,107 @@ public class ProfanityServiceTest {
     }
 
     @Test
-    void shouldPassForCleanText() throws JsonProcessingException {
+    void shouldNormalizeAndCompressGivingInputWord() {
         // GIVEN
-        TestRawRequestContent requestContent = new TestRawRequestContent("Este é um texto normal");
-        ObjectMapper mapper = new ObjectMapper();
-        String text = mapper.writeValueAsString(requestContent);
+        String notNormalizedText = "xing@m3nt0";
 
         // WHEN
-        Throwable thrown = Assertions.catchThrowable(() ->
-                profanityService.validate(text, TEST_USER_ID, FIELD, ACTION)
-        );
+        String normalizedText = profanityService.normalizeAndCompressWord(notNormalizedText);
 
         // THEN
-        Assertions.assertThat(thrown).isNull();
+        Assertions.assertThat(normalizedText).isEqualTo(BAD_WORD_2);
     }
 
     @Test
-    void shouldThrowForForbiddenWord() throws JsonProcessingException  {
+    void shouldRemoveRepeatedCharacters() {
         // GIVEN
-        TestRawRequestContent requestContent = new TestRawRequestContent("Esse texto tem curse dentro");
-        ObjectMapper mapper = new ObjectMapper();
-        String text = mapper.writeValueAsString(requestContent);
+        String input = "baaaaannnnn";
+        String expected = "ban";
 
         // WHEN
-        Throwable thrown = Assertions.catchThrowable(() ->
-                profanityService.validate(text, TEST_USER_ID, FIELD, ACTION)
-        );
+        String result = profanityService.normalizeAndCompressWord(input);
 
         // THEN
-        Assertions.assertThat(thrown).isInstanceOf(ResponseStatusException.class);
-        ResponseStatusException ex = (ResponseStatusException) thrown;
-        Assertions.assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        Mockito.verify(userFlagRepository, Mockito.times(1)).save(Mockito.any());
+        Assertions.assertThat(result).isEqualTo(expected);
     }
 
     @Test
-    void shouldDetectMultipleForbiddenWords() throws JsonProcessingException {
+    void shouldNormalizeSpecialCharacters() {
         // GIVEN
-        TestRawRequestContent requestContent = new TestRawRequestContent("curse e xingamento no mesmo texto");
-        ObjectMapper mapper = new ObjectMapper();
-        String text = mapper.writeValueAsString(requestContent);
+        String input = "h@ck!n9";
+        String expected = "hacking";
 
         // WHEN
-        Throwable thrown = Assertions.catchThrowable(() ->
-                profanityService.validate(text, TEST_USER_ID, FIELD, ACTION)
-        );
+        String result = profanityService.normalizeAndCompressWord(input);
 
         // THEN
-        Assertions.assertThat(thrown).isInstanceOf(ResponseStatusException.class);
-        Mockito.verify(userFlagRepository, Mockito.times(1)).save(Mockito.any());
+        Assertions.assertThat(result).isEqualTo(expected);
     }
 
     @Test
-    void shouldDetectAttemptOfBypassForForbiddenWords() throws JsonProcessingException  {
+    void shouldHandleMixedCase() {
         // GIVEN
-        TestRawRequestContent requestContent1 = new TestRawRequestContent( "c\\u-r 5e no texto");
-        ObjectMapper mapper1 = new ObjectMapper();
-        String text1 = mapper1.writeValueAsString(requestContent1);
-
-        TestRawRequestContent requestContent2 = new TestRawRequestContent( "x1n9 @m3nt0 no texto");
-        ObjectMapper mapper2 = new ObjectMapper();
-        String text2 = mapper2.writeValueAsString(requestContent2);
+        String input = "TeStE";
+        String expected = "teste";
 
         // WHEN
-        List<BannedWord> bannedWords = Arrays.asList(
-                BannedWord.builder().word(BAD_WORD_1).active(true).build(),
-                BannedWord.builder().word(BAD_WORD_2).active(true).build()
-        );
-        Mockito.when(bannedWordRepository.findByActiveTrue()).thenReturn(bannedWords);
-
-        Throwable thrown1 = Assertions.catchThrowable(() ->
-                profanityService.validate(text1, TEST_USER_ID, FIELD, ACTION)
-        );
-
-        Throwable thrown2 = Assertions.catchThrowable(() ->
-                profanityService.validate(text2, TEST_USER_ID, FIELD, ACTION)
-        );
+        String result = profanityService.normalizeAndCompressWord(input);
 
         // THEN
-        Assertions.assertThat(thrown1).isInstanceOf(ResponseStatusException.class);
-        Assertions.assertThat(thrown2).isInstanceOf(ResponseStatusException.class);
-        Mockito.verify(userFlagRepository, Mockito.times(2)).save(Mockito.any());
+        Assertions.assertThat(result).isEqualTo(expected);
     }
 
     @Test
-    void shouldIgnoreNullOrEmptyText() throws JsonProcessingException  {
+    void shouldHandleNullInput() {
         // GIVEN
-        TestRawRequestContent requestContent1 = new TestRawRequestContent( null);
-        ObjectMapper mapper1 = new ObjectMapper();
-        String text1 = mapper1.writeValueAsString(requestContent1);
-
-        TestRawRequestContent requestContent2 = new TestRawRequestContent( " ");
-        ObjectMapper mapper2 = new ObjectMapper();
-        String text2 = mapper2.writeValueAsString(requestContent2);
+        String input = null;
+        String expected = "";
 
         // WHEN
-        Throwable thrown1 = Assertions.catchThrowable(() ->
-                profanityService.validate(text1, TEST_USER_ID, FIELD, ACTION)
-        );
-        Throwable thrown2 = Assertions.catchThrowable(() ->
-                profanityService.validate(text2, TEST_USER_ID, FIELD, ACTION)
-        );
+        String result = profanityService.normalizeAndCompressWord(input);
 
         // THEN
-        Assertions.assertThat(thrown1).isNull();
-        Assertions.assertThat(thrown2).isNull();
+        Assertions.assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void shouldHandleEmptyInput() {
+        // GIVEN
+        String input = "";
+        String expected = "";
+
+        // WHEN
+        String result = profanityService.normalizeAndCompressWord(input);
+
+        // THEN
+        Assertions.assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void shouldAddWordIntoInternalCache() {
+        // GIVEN
+        String word = "Hello";
+        String normalizedWord = profanityService.normalizeAndCompressWord(word);
+
+        // WHEN
+        profanityService.addToCache(word);
+        Set<String> words = profanityService.getForbiddenWords();
+
+        // THEN
+        Assertions.assertThat(words).contains(normalizedWord);
+    }
+
+    @Test
+    void shouldRemoveWordFromInternalCache() {
+        // GIVEN
+        String word = "Hello";
+        String normalizedWord = profanityService.normalizeAndCompressWord(word);
+
+        // WHEN
+        profanityService.removeFromCache(word);
+        Set<String> words = profanityService.getForbiddenWords();
+
+        // THEN
+        Assertions.assertThat(words).doesNotContain(normalizedWord);
     }
 }
